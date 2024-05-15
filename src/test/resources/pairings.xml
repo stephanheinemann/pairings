@@ -1,0 +1,23 @@
+<!-- avoid redundant information and associated validation, derive data instead -->
+<!-- on the other hand: redundant pairing file contents could be validated -->
+<pairings>
+	<pairing id="ID" trip="NAT" base="STRING" away="DURATION" credits="DURATION" perdiems="FLOAT">
+		<initialDutyDays>
+			<initialDutyDay dayOfTheWeek="ENUM" date="DATE"/>
+		</initialDutyDays>
+		<dutyDays>
+			<dutyDay sequence="NAT">
+				<duty report="TOD" release="TOD">
+					<legs>
+						<leg role="DH|POS|OP" flight="NAT" origin="STRING" destination="STRING" report="TOD" offBlock="TOD" onBlock="TOD" release="TOD" block="DURATION" duty="DURATION" credits="DURATION" minimumCredits="BOOLEAN">
+							<equipment type="STRING" change="BOOLEAN"/>
+							<crew captains="NAT" firstOfficers="NAT" flightAttendants="NAT" extraFlightAttendants="NAT" />
+						</leg>
+					</legs>
+				</duty>
+				<!-- transport type, hotel, contacts -->
+				<rest layover="DURATION" commute="DURATION" accomodation="DURATION" />
+			</dutyDay>
+		</dutyDays>
+	</pairing>
+</pairings>
