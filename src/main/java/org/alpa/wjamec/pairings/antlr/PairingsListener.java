@@ -202,20 +202,20 @@ public interface PairingsListener extends ParseTreeListener {
     void exitPairingId(PairingsParser.PairingIdContext ctx);
 
     /**
-     * Enter a parse tree produced by {@link PairingsParser#pairingType}.
+     * Enter a parse tree produced by {@link PairingsParser#pairingAnnotation}.
      * 
      * @param ctx
      *                the parse tree
      */
-    void enterPairingType(PairingsParser.PairingTypeContext ctx);
+    void enterPairingAnnotation(PairingsParser.PairingAnnotationContext ctx);
 
     /**
-     * Exit a parse tree produced by {@link PairingsParser#pairingType}.
+     * Exit a parse tree produced by {@link PairingsParser#pairingAnnotation}.
      * 
      * @param ctx
      *                the parse tree
      */
-    void exitPairingType(PairingsParser.PairingTypeContext ctx);
+    void exitPairingAnnotation(PairingsParser.PairingAnnotationContext ctx);
 
     /**
      * Enter a parse tree produced by {@link PairingsParser#crew}.

@@ -179,7 +179,7 @@ public class PairingsBaseVisitor<T> extends AbstractParseTreeVisitor<T> implemen
      * </p>
      */
     @Override
-    public T visitPairingType(PairingsParser.PairingTypeContext ctx) {
+    public T visitPairingAnnotation(PairingsParser.PairingAnnotationContext ctx) {
         return visitChildren(ctx);
     }
 

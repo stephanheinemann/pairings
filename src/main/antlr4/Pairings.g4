@@ -10,14 +10,14 @@ tableHeader : TABLE_HEADER;
 
 preliminaryHeadline : base commonHeadline;
 finalHeadline : tripNumber pairingId commonHeadline;
-commonHeadline : pairingType crew baseIata daysOfWeek effectiveness;
+commonHeadline : pairingAnnotation crew baseIata daysOfWeek effectiveness;
 
 base : BASE;
 baseIata : BASE_IATA COLON;
 
 tripNumber : TRIP NAT;
 pairingId : PAIRING_ID;
-pairingType : PAIRING_TYPE;
+pairingAnnotation : PAIRING_ANNOTATION;
 
 crew : OBRK captains COMMA firstOfficers COMMA flightAttendants COMMA extraFlightAttendants CBRK;
 captains : NAT;
@@ -85,7 +85,7 @@ destination : BASE_IATA | IATA; // IATA 3 letter code
 out : time;
 in : time;
 block : duration;
-tog : duration | duration ASTERISK | ASTERISK; // meaning of * for TOG?
+tog : duration | duration ASTERISK | ASTERISK; // time on ground with or without tail swap
 credit : duration creditAnnotation?;
 creditAnnotation : CREDIT_ANNOTATION;
 layoverDuration : duration;
@@ -167,7 +167,7 @@ BASE_IATA : 'YEG' | 'YVR' | 'YWG' | 'YYC' | 'YYZ';
 IATA : CAPITAL_LETTER CAPITAL_LETTER CAPITAL_LETTER;
 
 PAIRING_ID : BASE_INITIAL DIGIT DIGIT (DIGIT | CAPITAL_LETTER) (DIGIT | CAPITAL_LETTER);
-PAIRING_TYPE : OPAR PAIRING_LITERAL CPAR;
+PAIRING_ANNOTATION : OPAR PAIRING_LITERAL CPAR;
 CREDIT_ANNOTATION : OPAR + CREDIT_LITERAL + CPAR;
 
 TRIP : 'TRIP #';
@@ -182,7 +182,7 @@ CHECKIN_DUTY : 'MO' | 'RE';
 
 DEADHEAD : 'DH' UNDERSCORE;
 AIRLINE : ('AA' | 'AC' | 'DL' | 'UA' | 'HA' | 'FI' | 'AM' | 'EI') UNDERSCORE;
-AIRCRAFT : ('_73G' | '_7M8' | '_7S8' | '_73H' | '_7F8' | '_789' | 'DH4');
+AIRCRAFT : ('_73W' | '_73H' | '_73G' | '_7M8' | '_7S8' | '_7F8' | '_789' | 'DH4');
 
 HOTEL : 'hotel' | 'Hotel' | 'HOTEL';
 TAFB : 'TAFB';

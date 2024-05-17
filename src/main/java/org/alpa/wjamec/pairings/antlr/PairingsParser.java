@@ -34,13 +34,13 @@ public class PairingsParser extends Parser {
             FOUR_DASHES = 8, DASHES = 9, UNDERLINE = 10, COMMA = 11, COLON = 12, ASTERISK = 13, TWICE = 14,
             CAPITAL_LETTER = 15, LETTER = 16, DAYS_OF_WEEK = 17, WEEKDAY = 18, MONTH = 19, NAT = 20, NATREAL = 21,
             HOURS = 22, MINUTES = 23, TIME = 24, DURATION = 25, REPORT = 26, RELEASE = 27, TBD = 28, GROUND = 29,
-            BASE = 30, BASE_IATA = 31, IATA = 32, PAIRING_ID = 33, PAIRING_TYPE = 34, CREDIT_ANNOTATION = 35, TRIP = 36,
-            TABLE_HEADER = 37, START = 38, EFFECTIVE = 39, EXCEPTIONS = 40, NO_EXCEPTIONS = 41, CHECKIN_DUTY = 42,
-            DEADHEAD = 43, AIRLINE = 44, AIRCRAFT = 45, HOTEL = 46, TAFB = 47, CREDIT = 48, PERDIEM = 49, WORD = 50,
-            WS = 51;
+            BASE = 30, BASE_IATA = 31, IATA = 32, PAIRING_ID = 33, PAIRING_ANNOTATION = 34, CREDIT_ANNOTATION = 35,
+            TRIP = 36, TABLE_HEADER = 37, START = 38, EFFECTIVE = 39, EXCEPTIONS = 40, NO_EXCEPTIONS = 41,
+            CHECKIN_DUTY = 42, DEADHEAD = 43, AIRLINE = 44, AIRCRAFT = 45, HOTEL = 46, TAFB = 47, CREDIT = 48,
+            PERDIEM = 49, WORD = 50, WS = 51;
     public static final int RULE_pairings = 0, RULE_pairing = 1, RULE_header = 2, RULE_headline = 3,
             RULE_tableHeader = 4, RULE_preliminaryHeadline = 5, RULE_finalHeadline = 6, RULE_commonHeadline = 7,
-            RULE_base = 8, RULE_baseIata = 9, RULE_tripNumber = 10, RULE_pairingId = 11, RULE_pairingType = 12,
+            RULE_base = 8, RULE_baseIata = 9, RULE_tripNumber = 10, RULE_pairingId = 11, RULE_pairingAnnotation = 12,
             RULE_crew = 13, RULE_captains = 14, RULE_firstOfficers = 15, RULE_flightAttendants = 16,
             RULE_extraFlightAttendants = 17, RULE_daysOfWeek = 18, RULE_effectiveness = 19, RULE_period = 20,
             RULE_month = 21, RULE_dayOfMonth = 22, RULE_daysOfMonth = 23, RULE_dayToMonth = 24, RULE_exceptions = 25,
@@ -59,10 +59,10 @@ public class PairingsParser extends Parser {
 
     private static String[] makeRuleNames() {
         return new String[] { "pairings", "pairing", "header", "headline", "tableHeader", "preliminaryHeadline",
-                "finalHeadline", "commonHeadline", "base", "baseIata", "tripNumber", "pairingId", "pairingType", "crew",
-                "captains", "firstOfficers", "flightAttendants", "extraFlightAttendants", "daysOfWeek", "effectiveness",
-                "period", "month", "dayOfMonth", "daysOfMonth", "dayToMonth", "exceptions", "withExceptions",
-                "withoutExceptions", "contents", "content", "calendarWeek", "calendarMonthLetter",
+                "finalHeadline", "commonHeadline", "base", "baseIata", "tripNumber", "pairingId", "pairingAnnotation",
+                "crew", "captains", "firstOfficers", "flightAttendants", "extraFlightAttendants", "daysOfWeek",
+                "effectiveness", "period", "month", "dayOfMonth", "daysOfMonth", "dayToMonth", "exceptions",
+                "withExceptions", "withoutExceptions", "contents", "content", "calendarWeek", "calendarMonthLetter",
                 "calendarDaysOfMonth", "calendarDayOfMonth", "contentSeparator", "start", "checkin", "report",
                 "checkinDuty", "checkout", "release", "checkoutDuty", "leg", "flightLeg", "groundLeg", "layover",
                 "accommodation", "transportation", "layoverDurations", "phone", "flight", "ground", "deadhead",
@@ -90,7 +90,7 @@ public class PairingsParser extends Parser {
         return new String[] { null, "OPAR", "CPAR", "OBRK", "CBRK", "SLASH", "DASH", "TWO_DASHES", "FOUR_DASHES",
                 "DASHES", "UNDERLINE", "COMMA", "COLON", "ASTERISK", "TWICE", "CAPITAL_LETTER", "LETTER",
                 "DAYS_OF_WEEK", "WEEKDAY", "MONTH", "NAT", "NATREAL", "HOURS", "MINUTES", "TIME", "DURATION", "REPORT",
-                "RELEASE", "TBD", "GROUND", "BASE", "BASE_IATA", "IATA", "PAIRING_ID", "PAIRING_TYPE",
+                "RELEASE", "TBD", "GROUND", "BASE", "BASE_IATA", "IATA", "PAIRING_ID", "PAIRING_ANNOTATION",
                 "CREDIT_ANNOTATION", "TRIP", "TABLE_HEADER", "START", "EFFECTIVE", "EXCEPTIONS", "NO_EXCEPTIONS",
                 "CHECKIN_DUTY", "DEADHEAD", "AIRLINE", "AIRCRAFT", "HOTEL", "TAFB", "CREDIT", "PERDIEM", "WORD", "WS" };
     }
@@ -619,8 +619,8 @@ public class PairingsParser extends Parser {
     @SuppressWarnings("CheckReturnValue")
     public static class CommonHeadlineContext extends ParserRuleContext {
 
-        public PairingTypeContext pairingType() {
-            return getRuleContext(PairingTypeContext.class, 0);
+        public PairingAnnotationContext pairingAnnotation() {
+            return getRuleContext(PairingAnnotationContext.class, 0);
         }
 
         public CrewContext crew() {
@@ -676,7 +676,7 @@ public class PairingsParser extends Parser {
             enterOuterAlt(_localctx, 1);
             {
                 setState(182);
-                pairingType();
+                pairingAnnotation();
                 setState(183);
                 crew();
                 setState(184);
@@ -933,50 +933,50 @@ public class PairingsParser extends Parser {
     }
 
     @SuppressWarnings("CheckReturnValue")
-    public static class PairingTypeContext extends ParserRuleContext {
+    public static class PairingAnnotationContext extends ParserRuleContext {
 
-        public TerminalNode PAIRING_TYPE() {
-            return getToken(PairingsParser.PAIRING_TYPE, 0);
+        public TerminalNode PAIRING_ANNOTATION() {
+            return getToken(PairingsParser.PAIRING_ANNOTATION, 0);
         }
 
-        public PairingTypeContext(ParserRuleContext parent, int invokingState) {
+        public PairingAnnotationContext(ParserRuleContext parent, int invokingState) {
             super(parent, invokingState);
         }
 
         @Override
         public int getRuleIndex() {
-            return RULE_pairingType;
+            return RULE_pairingAnnotation;
         }
 
         @Override
         public void enterRule(ParseTreeListener listener) {
             if (listener instanceof PairingsListener)
-                ((PairingsListener) listener).enterPairingType(this);
+                ((PairingsListener) listener).enterPairingAnnotation(this);
         }
 
         @Override
         public void exitRule(ParseTreeListener listener) {
             if (listener instanceof PairingsListener)
-                ((PairingsListener) listener).exitPairingType(this);
+                ((PairingsListener) listener).exitPairingAnnotation(this);
         }
 
         @Override
         public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
             if (visitor instanceof PairingsVisitor)
-                return ((PairingsVisitor<? extends T>) visitor).visitPairingType(this);
+                return ((PairingsVisitor<? extends T>) visitor).visitPairingAnnotation(this);
             else
                 return visitor.visitChildren(this);
         }
     }
 
-    public final PairingTypeContext pairingType() throws RecognitionException {
-        PairingTypeContext _localctx = new PairingTypeContext(_ctx, getState());
-        enterRule(_localctx, 24, RULE_pairingType);
+    public final PairingAnnotationContext pairingAnnotation() throws RecognitionException {
+        PairingAnnotationContext _localctx = new PairingAnnotationContext(_ctx, getState());
+        enterRule(_localctx, 24, RULE_pairingAnnotation);
         try {
             enterOuterAlt(_localctx, 1);
             {
                 setState(198);
-                match(PAIRING_TYPE);
+                match(PAIRING_ANNOTATION);
             }
         } catch (RecognitionException re) {
             _localctx.exception = re;

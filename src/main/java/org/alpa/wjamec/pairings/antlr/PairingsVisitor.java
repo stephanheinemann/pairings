@@ -122,13 +122,13 @@ public interface PairingsVisitor<T> extends ParseTreeVisitor<T> {
     T visitPairingId(PairingsParser.PairingIdContext ctx);
 
     /**
-     * Visit a parse tree produced by {@link PairingsParser#pairingType}.
+     * Visit a parse tree produced by {@link PairingsParser#pairingAnnotation}.
      * 
      * @param ctx
      *                the parse tree
      * @return the visitor result
      */
-    T visitPairingType(PairingsParser.PairingTypeContext ctx);
+    T visitPairingAnnotation(PairingsParser.PairingAnnotationContext ctx);
 
     /**
      * Visit a parse tree produced by {@link PairingsParser#crew}.

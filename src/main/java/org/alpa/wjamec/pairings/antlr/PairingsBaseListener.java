@@ -284,7 +284,7 @@ public class PairingsBaseListener implements PairingsListener {
      * </p>
      */
     @Override
-    public void enterPairingType(PairingsParser.PairingTypeContext ctx) {
+    public void enterPairingAnnotation(PairingsParser.PairingAnnotationContext ctx) {
     }
 
     /**
@@ -295,7 +295,7 @@ public class PairingsBaseListener implements PairingsListener {
      * </p>
      */
     @Override
-    public void exitPairingType(PairingsParser.PairingTypeContext ctx) {
+    public void exitPairingAnnotation(PairingsParser.PairingAnnotationContext ctx) {
     }
 
     /**
