@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="https://github.com/stephanheinemann/pairings/tree/master/src/main/resources/xsd"
+    xmlns:pairings="https://github.com/stephanheinemann/pairings/tree/master/src/main/resources/xsd"
+    elementFormDefault="qualified">
+
+    <element name="pairings">
+        <complexType>
+            <choice>
+                <sequence>
+                    <element name="pairing" type="pairings:Pairing" maxOccurs="unbounded" minOccurs="0"></element>
+                </sequence>
+                <sequence>
+                    <element name="preliminaryPairing" type="pairings:PreliminaryPairing" maxOccurs="unbounded"
+                        minOccurs="0"></element>
+                </sequence>
+            </choice>
+        </complexType>
+    </element>
+
+    <complexType name="Pairing">
+        <complexContent>
+            <extension base="pairings:PreliminaryPairing">
+                <attribute name="trip" type="positiveInteger" use="required"></attribute>
+                <attribute name="pairing" type="string" use="required"></attribute>
+            </extension>
+        </complexContent>
+    </complexType>
+
+    <complexType name="PreliminaryPairing">
+        <sequence>
+            <element name="crew" type="pairings:Crew" minOccurs="1" maxOccurs="1"></element>
+            <element name="inidialDutyDays" type="pairings:InitialDutyDays" minOccurs="1" maxOccurs="1"></element>
+            <element name="dutyDays" type="pairings:DutyDays" minOccurs="1" maxOccurs="1"></element>
+        </sequence>
+        <attribute name="base" type="pairings:Base" use="required"></attribute>
+        <attribute name="pairingAnnotation" type="pairings:PairingAnnotation" use="required"></attribute>
+        <attribute name="timeAwayFromBase" type="duration" use="required"></attribute>
+        <attribute name="credit" type="duration" use="required"></attribute>
+        <attribute name="creditAnnotation" type="pairings:CreditAnnotation" use="optional"></attribute>
+        <attribute name="perDiem" type="float" use="required"></attribute>
+    </complexType>
+
+    <simpleType name="PairingAnnotation">
+        <restriction base="string">
+            <enumeration id="OT" value="OptimizedTrip"></enumeration>
+            <enumeration id="OL" value="OptimizedLock"></enumeration>
+            <enumeration id="MT" value="ManualTrip"></enumeration>
+            <enumeration id="ML" value="ManualLock"></enumeration>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="CreditAnnotation">
+        <restriction base="string">
+            <enumeration id="M" value="MinimumValue"></enumeration>
+            <enumeration id="L" value="LegValue"></enumeration>
+            <enumeration id="D" value="DutyValue"></enumeration>
+            <enumeration id="T" value="TripValue"></enumeration>
+            <enumeration id="R" value="ResultingValue"></enumeration><!-- meaning of (R)? -->
+        </restriction>
+    </simpleType>
+
+    <simpleType name="Base">
+        <restriction base="string">
+            <enumeration id="YEG" value="Edmonton"></enumeration>
+            <enumeration id="YVR" value="Vancouver"></enumeration>
+            <enumeration id="YWG" value="Winnipeg"></enumeration>
+            <enumeration id="YYC" value="Calgary"></enumeration>
+            <enumeration id="YYZ" value="Toronto"></enumeration>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="DutyAnnotation">
+        <restriction base="string">
+            <enumeration id="MO" value="MorningDuty"></enumeration>
+            <enumeration id="RE" value="RedEyeDuty"></enumeration>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="Aircraft">
+        <restriction base="string">
+            <enumeration id="_73W" value="Boeing 737-700 Winglets"></enumeration>
+            <enumeration id="_73H" value="Boeing 737-800 Winglets"></enumeration>
+            <enumeration id="_73G" value="Boeing 737-700"></enumeration>
+            <enumeration id="_7M8" value="Boeing 737 MAX8"></enumeration>
+            <enumeration id="_7S8" value="Boeing 737-800"></enumeration>
+            <enumeration id="_7F8" value="Boeing 737-800 Freighter"></enumeration>
+            <enumeration id="_789" value="Boeing 787-9"></enumeration>
+            <enumeration id="DH4" value="Bombardier Q400"></enumeration>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="Airline">
+        <restriction base="string">
+            <enumeration id="AA" value="American Airlines"></enumeration>
+            <enumeration id="AC" value="Air Canada"></enumeration>
+            <enumeration id="AM" value="Aeromexico"></enumeration>
+            <enumeration id="DL" value="Delta Airlines"></enumeration>
+            <enumeration id="EI" value="Aer Lingus"></enumeration>
+            <enumeration id="FI" value="Icelandair"></enumeration>
+            <enumeration id="HA" value="Hawaiian Airlines"></enumeration>
+            <enumeration id="UA" value="United Airlines"></enumeration>
+            <enumeration id="WS" value="WestJet Airlines"></enumeration>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="Vehicle">
+        <restriction base="string">
+            <enumeration id="GND" value="Ground Transportation"></enumeration>
+            <enumeration id="LIM" value="Limousine"></enumeration>
+        </restriction>
+    </simpleType>
+
+    <complexType name="Crew">
+        <attribute name="captains" type="nonNegativeInteger" use="required"></attribute>
+        <attribute name="firstOfficers" type="nonNegativeInteger" use="required"></attribute>
+        <attribute name="flightAttendants" type="nonNegativeInteger" use="required"></attribute>
+        <attribute name="extraFlightAttendants" type="nonNegativeInteger" use="required"></attribute>
+    </complexType>
+
+    <complexType name="InitialDutyDays">
+        <sequence>
+            <element name="dutyDay" type="pairings:InitialDutyDay" minOccurs="1" maxOccurs="31"></element>
+        </sequence>
+    </complexType>
+
+    <complexType name="InitialDutyDay">
+        <attribute name="date" type="date" use="required"></attribute>
+        <attribute name="weekday" type="pairings:Weekday" use="required"></attribute>
+    </complexType>
+
+    <simpleType name="Weekday">
+        <restriction base="string">
+            <enumeration value="Monday"></enumeration>
+            <enumeration value="Tuesday"></enumeration>
+            <enumeration value="Wednesday"></enumeration>
+            <enumeration value="Thursday"></enumeration>
+            <enumeration value="Friday"></enumeration>
+            <enumeration value="Saturday"></enumeration>
+            <enumeration value="Sunday"></enumeration>
+        </restriction>
+    </simpleType>
+
+    <complexType name="DutyDays">
+        <sequence>
+            <element name="dutyDay" type="pairings:DutyDay" minOccurs="1" maxOccurs="5"></element>
+        </sequence>
+    </complexType>
+
+    <complexType name="DutyDay">
+        <sequence>
+            <element name="duty" type="pairings:Duty" minOccurs="1" maxOccurs="unbounded"></element>
+        </sequence>
+        <attribute name="sequence" type="positiveInteger" use="required"></attribute>
+    </complexType>
+
+    <complexType name="Leg" abstract="true">
+        <attribute name="origin" type="string" use="required"></attribute>
+        <attribute name="destination" type="string" use="required"></attribute>
+        <attribute name="out" type="time" use="required"></attribute>
+        <attribute name="in" type="time" use="required"></attribute>
+        <attribute name="block" type="duration" use="required"></attribute>
+        <attribute name="credit" type="duration" use="required"></attribute>
+        <attribute name="creditAnnotation" type="pairings:CreditAnnotation" use="optional"></attribute>
+        <attribute name="number" type="nonNegativeInteger" use="required"></attribute>
+    </complexType>
+
+    <complexType name="GroundLeg">
+        <complexContent>
+            <extension base="pairings:Leg">
+                <attribute name="vehicle" type="pairings:Vehicle" use="required"></attribute>
+            </extension>
+        </complexContent>
+    </complexType>
+
+    <complexType name="FlightLeg">
+        <complexContent>
+            <extension base="pairings:Leg">
+                <sequence>
+                    <element name="crew" type="pairings:Crew" minOccurs="0" maxOccurs="1"></element>
+                </sequence>
+                <attribute name="aircraft" type="pairings:Aircraft" use="optional"></attribute>
+                <attribute name="airline" type="pairings:Airline" use="optional" default="WestJet Airlines"></attribute>
+                <attribute name="operating" type="boolean" use="required"></attribute>
+                <attribute name="timeOnGround" type="duration" use="optional"></attribute>
+                <attribute name="tailSwap" type="boolean" use="optional" default="false"></attribute>
+            </extension>
+        </complexContent>
+    </complexType>
+
+    <complexType name="Checkin">
+        <attribute name="report" type="boolean" use="optional" default="false"></attribute>
+        <attribute name="out" type="time" use="required"></attribute>
+        <attribute name="timeOnGround" type="duration" use="required"></attribute>
+        <attribute name="dutyAnnotation" type="pairings:DutyAnnotation" use="optional"></attribute>
+    </complexType>
+
+    <complexType name="Checkout">
+        <attribute name="release" type="boolean" use="optional" default="false"></attribute>
+        <attribute name="in" type="time" use="required"></attribute>
+        <attribute name="block" type="duration" use="required"></attribute>
+        <attribute name="timeOnGround" type="duration" use="required"></attribute>
+        <attribute name="duty" type="duration" use="required"></attribute>
+        <attribute name="credit" type="duration" use="required"></attribute>
+        <attribute name="creditAnnotation" type="pairings:CreditAnnotation" use="optional"></attribute>
+    </complexType>
+
+    <complexType name="Duty">
+        <sequence>
+            <element name="checkin" type="pairings:Checkin" minOccurs="1" maxOccurs="1"></element>
+            <element name="leg" type="pairings:Leg" minOccurs="1" maxOccurs="unbounded"></element>
+            <element name="checkout" type="pairings:Checkout" minOccurs="1" maxOccurs="1"></element>
+            <element name="layover" type="pairings:Layover" minOccurs="0" maxOccurs="1"></element>
+        </sequence>
+    </complexType>
+
+    <complexType name="Layover">
+        <sequence>
+            <element name="accomodation" type="pairings:Accommodation" minOccurs="1" maxOccurs="1"></element>
+            <element name="transportation" type="pairings:Transportation" minOccurs="1" maxOccurs="1"></element>
+        </sequence>
+        <attribute name="rest" type="duration" use="required"></attribute>
+    </complexType>
+    
+    <complexType name="Accommodation">
+        <attribute name="details" type="string" use="optional" default="TBD"></attribute>
+        <attribute name="accomodation" type="duration" use="required"></attribute>
+    </complexType>
+
+    <complexType name="Transportation">
+        <attribute name="details" type="string" use="optional" default="TBD"></attribute>
+        <attribute name="transportation" type="duration"></attribute>
+    </complexType>
+</schema>
