@@ -11,7 +11,6 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
-
 	<build>
 		<plugins>
 			<plugin>
@@ -25,32 +24,16 @@
 					<release>17</release>
 				</configuration>
 			</plugin>
-			<!--plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.4.0</version>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>${project.build.directory}/generated-sources/antlr4/main/antlr</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin-->
 			<plugin>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-maven-plugin</artifactId>
 				<version>4.13.1</version>
 				<configuration>
+					<outputDirectory>${basedir}/src/main/java/org/alpa/wjamec/pairings/antlr</outputDirectory>
 					<arguments>
+						<argument>-package</argument>
+						<argument>org.alpa.wjamec.pairings.antlr</argument>
 						<argument>-visitor</argument>
-						<!--argument>-Dlanguage=Java</argument-->
 					</arguments>
 				</configuration>
 				<executions>
@@ -63,6 +46,31 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxb2-maven-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>xjc</id>
+						<goals>
+							<goal>xjc</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<sources>
+						<source>${basedir}/src/main/resources/xsd/pairings.xsd</source>
+					</sources>
+					<xjbSources>
+						<xjbSource>
+							${basedir}/src/main/resources/xjb/pairings.xjb</xjbSource>
+					</xjbSources>
+					<outputDirectory>${basedir}/src/main/java</outputDirectory>
+					<clearOutputDir>false</clearOutputDir>
+					<packageName>org.alpa.wjamec.pairings.jaxb</packageName>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>external.atlassian.jgitflow</groupId>
 				<artifactId>jgitflow-maven-plugin</artifactId>
 				<version>1.0-m5</version>
@@ -72,14 +80,20 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.2</version>
-		</dependency>
-		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr4-runtime</artifactId>
 			<version>4.13.1</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>4.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.2</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
