@@ -12,9 +12,12 @@
                 </sequence>
                 <sequence>
                     <element name="preliminaryPairing" type="pairings:PreliminaryPairing" maxOccurs="unbounded"
-                        minOccurs="0"></element>
+                        minOccurs="0">
+                    </element>
                 </sequence>
             </choice>
+            <attribute name="validFrom" type="date" use="required"></attribute>
+            <attribute name="validTo" type="date" use="required"></attribute>
         </complexType>
     </element>
 
@@ -56,7 +59,7 @@
             <enumeration id="L" value="LegValue"></enumeration>
             <enumeration id="D" value="DutyValue"></enumeration>
             <enumeration id="T" value="TripValue"></enumeration>
-            <enumeration id="R" value="ResultingValue"></enumeration><!-- meaning of (R)? -->
+            <enumeration id="R" value="RatioValue"></enumeration><!-- meaning of (R)? -->
         </restriction>
     </simpleType>
 
