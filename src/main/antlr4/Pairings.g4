@@ -1,5 +1,11 @@
 grammar Pairings;
 
+pairingsDocument : titlePage pairings;
+titlePage : title TITLE_SEPARATOR;
+title : .*? longMonth year .*?;
+longMonth: LONG_MONTH;
+year: NAT;
+
 pairings : pairing*;
 pairing : header contents footer;
 
@@ -68,10 +74,12 @@ flightLeg : dutyDay flight origin destination out in block tog? credit aircraft?
 groundLeg : dutyDay ground origin destination out in block credit;
 
 layover : accommodation SLASH? transportation (DASH | TWO_DASHES | FOUR_DASHES | DASHES)? layoverDurations;
-accommodation : ((BASE_IATA | IATA) (DASH CAPITAL_LETTER?)? HOTEL)? (TBD | CAPITAL_LETTER | WORD | NAT)* phone?;
-transportation : (BASE_IATA | IATA | HOTEL | CAPITAL_LETTER | WORD | NAT)* phone?;
-layoverDurations : layoverDuration OPAR transportationDuration CPAR restDuration;
+accommodation : ((BASE_IATA | AIRPORT_IATA) DASH? CAPITAL_LETTER? DASH? HOTEL)? (TBD | CAPITAL_LETTER | WORD | NAT)* phone?;
+transportation : (BASE_IATA | AIRPORT_IATA | HOTEL | CAPITAL_LETTER | WORD | NAT)* phone?;
+layoverDurations : layoverDuration (OPAR transportationDuration CPAR)? accommodationDuration?;
 phone : OPAR? NAT CPAR? (NAT | DASH)*;
+
+// (DASH CAPITAL_LETTER?) HOTEL
 
 flight : (deadhead | airline)? NAT;
 ground : GROUND NAT?;
@@ -79,8 +87,8 @@ deadhead : DEADHEAD;
 airline : AIRLINE;
 aircraft : AIRCRAFT;
 
-origin : BASE_IATA | IATA; // IATA 3 letter code
-destination : BASE_IATA | IATA; // IATA 3 letter code
+origin : BASE_IATA | AIRPORT_IATA; // IATA 3 letter code
+destination : BASE_IATA | AIRPORT_IATA; // IATA 3 letter code
 
 out : time;
 in : time;
@@ -90,7 +98,7 @@ credit : duration creditAnnotation?;
 creditAnnotation : CREDIT_ANNOTATION;
 layoverDuration : duration;
 transportationDuration : duration TWICE;
-restDuration : duration;
+accommodationDuration : duration;
 
 hours : NATREAL;
 time : TIME;
@@ -111,7 +119,6 @@ fragment SPACE : ' ';
 fragment TAB : '\t';
 fragment RETURN : '\r';
 fragment NEWLINE : '\n';
-fragment DOT : '.';
 fragment HOUR : 'h';
 fragment DIGIT : [0-9];
 fragment BASE_INITIAL : 'E' | 'V' | 'W' | 'C' | 'T';
@@ -123,16 +130,22 @@ OPAR : '(';
 CPAR : ')';
 OBRK : '[';
 CBRK : ']';
+ODQT : '“' | '"';
+CDQT : '”' | '"';
 SLASH : '/';
 DASH : '-';
 TWO_DASHES : '--';
 FOUR_DASHES : '----';
 DASHES : DASH+;
 UNDERLINE : '____________________________________________________________________________________________________';
+TITLE_SEPARATOR : '_______________________________________________________________________________________________________________________';
+DOT : '.';
 COMMA : ',';
 COLON : ':';
+ADD : '+';
 ASTERISK : '*';
 TWICE : '*2';
+DOLLAR : '$';
 
 CAPITAL_LETTER : [A-Z];
 LETTER : [a-zA-Z];
@@ -149,6 +162,7 @@ DAYS_OF_WEEK :
 WEEKDAY : 'Mo' | 'Tu' | 'We' | 'Th' | 'Fr' | 'Sa' | 'Su';
 //DAY_OF_MONTH : NAT; // DIGIT DIGIT;
 MONTH : 'JAN' | 'FEB' | 'MAR' | 'APR' | 'MAY' | 'JUN' | 'JUL' | 'AUG' | 'SEP' | 'OCT' | 'NOV' | 'DEC';
+LONG_MONTH : 'JANUARY' | 'FEBRUARY' | 'MARCH' | 'APRIL' | 'MAY' | 'JUNE' | 'JULY' | 'AUGUST' | 'SEPTEMBER' | 'OCTOBER' | 'NOVEMBER' | 'DECEMBER';
 
 NAT : DIGIT+;
 NATREAL : NAT DOT NAT;
@@ -164,11 +178,12 @@ GROUND : 'GND'| 'LIM';
 
 BASE : 'EDMONTON' | 'VANCOUVER' | 'WINNIPEG' | 'CALGARY' | 'TORONTO';
 BASE_IATA : 'YEG' | 'YVR' | 'YWG' | 'YYC' | 'YYZ';
-IATA : CAPITAL_LETTER CAPITAL_LETTER CAPITAL_LETTER;
+AIRPORT_IATA : 'ANU' | 'ATL' | 'AUA' | 'AUS' | 'AZA' | 'AZS' | 'BDA' | 'BFS' | 'BGI' | 'BNA' | 'BOS' | 'BZE' | 'CCC' | 'CUN' | 'CUR' | 'CZM' | 'DEN' | 'DTW' | 'DUB' | 'EDI' | 'EWR' | 'FLL' | 'GCM' | 'GDL' | 'HAV' | 'HNL' | 'HOG' | 'HUX' | 'IAD' | 'IAH' | 'JFK' | 'KEF' | 'KIN' | 'KOA' | 'LAS' | 'LAX' | 'LGA' | 'LGW' | 'LIH' | 'LIR' | 'LTO' | 'MBJ' | 'MCO' | 'MIA' | 'MID' | 'MSP' | 'MZT' | 'NAS' | 'OGG' | 'ORD' | 'PDX' | 'PHX' | 'PLS' | 'POP' | 'PSP' | 'PUJ' | 'PVR' | 'RSW' | 'RTB' | 'SAN' | 'SEA' | 'SFO' | 'SJD' | 'SJU' | 'SNA' | 'SXM' | 'TPA' | 'UVF' | 'VRA' | 'YCD' | 'YDF' | 'YEG' | 'YFC' | 'YFI' | 'YHM' | 'YHU' | 'YHZ' | 'YKF' | 'YLW' | 'YMM' | 'YOW' | 'YQB' | 'YQG' | 'YQM' | 'YQQ' | 'YQR' | 'YQT' | 'YQU' | 'YUL' | 'YVR' | 'YWG' | 'YXE' | 'YXS' | 'YXU' | 'YXX' | 'YXY' | 'YYC' | 'YYG' | 'YYJ' | 'YYT' | 'YYZ' | 'YZF' | 'ZIH' | 'ZLO';
+// AIRPORT_IATA : CAPITAL_LETTER CAPITAL_LETTER CAPITAL_LETTER;
 
 PAIRING_ID : BASE_INITIAL DIGIT DIGIT (DIGIT | CAPITAL_LETTER) (DIGIT | CAPITAL_LETTER);
 PAIRING_ANNOTATION : OPAR PAIRING_LITERAL CPAR;
-CREDIT_ANNOTATION : OPAR + CREDIT_LITERAL + CPAR;
+CREDIT_ANNOTATION : OPAR CREDIT_LITERAL CPAR;
 
 TRIP : 'TRIP #';
 TABLE_HEADER : 'MO TU WE TH FR SA SU DAY FLT# DEP ARR DEP ARR BLK TOG DUTY CREDIT LO A/C CREW COMP';
@@ -181,7 +196,8 @@ NO_EXCEPTIONS : 'no exceptions.';
 CHECKIN_DUTY : 'MO' | 'RE';
 
 DEADHEAD : 'DH' UNDERSCORE;
-AIRLINE : ('AA' | 'AC' | 'DL' | 'UA' | 'HA' | 'FI' | 'AM' | 'EI') UNDERSCORE;
+AIRLINE :  AIRLINE_IATA UNDERSCORE;
+AIRLINE_IATA : 'AA' | 'AC' | 'DL' | 'UA' | 'HA' | 'FI' | 'AM' | 'EI';
 AIRCRAFT : ('_73W' | '_73H' | '_73G' | '_7M8' | '_7S8' | '_7F8' | '_789' | 'DH4');
 
 HOTEL : 'hotel' | 'Hotel' | 'HOTEL';

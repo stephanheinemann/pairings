@@ -11,6 +11,36 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface PairingsVisitor<T> extends ParseTreeVisitor<T> {
 	/**
+	 * Visit a parse tree produced by {@link PairingsParser#pairingsDocument}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPairingsDocument(PairingsParser.PairingsDocumentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PairingsParser#titlePage}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTitlePage(PairingsParser.TitlePageContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PairingsParser#title}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTitle(PairingsParser.TitleContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PairingsParser#longMonth}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLongMonth(PairingsParser.LongMonthContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PairingsParser#year}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitYear(PairingsParser.YearContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PairingsParser#pairings}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -401,11 +431,11 @@ public interface PairingsVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTransportationDuration(PairingsParser.TransportationDurationContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PairingsParser#restDuration}.
+	 * Visit a parse tree produced by {@link PairingsParser#accommodationDuration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRestDuration(PairingsParser.RestDurationContext ctx);
+	T visitAccommodationDuration(PairingsParser.AccommodationDurationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PairingsParser#hours}.
 	 * @param ctx the parse tree

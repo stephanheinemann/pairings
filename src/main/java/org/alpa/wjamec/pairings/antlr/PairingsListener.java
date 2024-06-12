@@ -8,6 +8,56 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface PairingsListener extends ParseTreeListener {
 	/**
+	 * Enter a parse tree produced by {@link PairingsParser#pairingsDocument}.
+	 * @param ctx the parse tree
+	 */
+	void enterPairingsDocument(PairingsParser.PairingsDocumentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PairingsParser#pairingsDocument}.
+	 * @param ctx the parse tree
+	 */
+	void exitPairingsDocument(PairingsParser.PairingsDocumentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PairingsParser#titlePage}.
+	 * @param ctx the parse tree
+	 */
+	void enterTitlePage(PairingsParser.TitlePageContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PairingsParser#titlePage}.
+	 * @param ctx the parse tree
+	 */
+	void exitTitlePage(PairingsParser.TitlePageContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PairingsParser#title}.
+	 * @param ctx the parse tree
+	 */
+	void enterTitle(PairingsParser.TitleContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PairingsParser#title}.
+	 * @param ctx the parse tree
+	 */
+	void exitTitle(PairingsParser.TitleContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PairingsParser#longMonth}.
+	 * @param ctx the parse tree
+	 */
+	void enterLongMonth(PairingsParser.LongMonthContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PairingsParser#longMonth}.
+	 * @param ctx the parse tree
+	 */
+	void exitLongMonth(PairingsParser.LongMonthContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PairingsParser#year}.
+	 * @param ctx the parse tree
+	 */
+	void enterYear(PairingsParser.YearContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PairingsParser#year}.
+	 * @param ctx the parse tree
+	 */
+	void exitYear(PairingsParser.YearContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link PairingsParser#pairings}.
 	 * @param ctx the parse tree
 	 */
@@ -658,15 +708,15 @@ public interface PairingsListener extends ParseTreeListener {
 	 */
 	void exitTransportationDuration(PairingsParser.TransportationDurationContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PairingsParser#restDuration}.
+	 * Enter a parse tree produced by {@link PairingsParser#accommodationDuration}.
 	 * @param ctx the parse tree
 	 */
-	void enterRestDuration(PairingsParser.RestDurationContext ctx);
+	void enterAccommodationDuration(PairingsParser.AccommodationDurationContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link PairingsParser#restDuration}.
+	 * Exit a parse tree produced by {@link PairingsParser#accommodationDuration}.
 	 * @param ctx the parse tree
 	 */
-	void exitRestDuration(PairingsParser.RestDurationContext ctx);
+	void exitAccommodationDuration(PairingsParser.AccommodationDurationContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PairingsParser#hours}.
 	 * @param ctx the parse tree
