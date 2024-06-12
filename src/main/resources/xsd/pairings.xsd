@@ -33,7 +33,7 @@
     <complexType name="PreliminaryPairing">
         <sequence>
             <element name="crew" type="pairings:Crew" minOccurs="1" maxOccurs="1"></element>
-            <element name="inidialDutyDays" type="pairings:InitialDutyDays" minOccurs="1" maxOccurs="1"></element>
+            <element name="initialDutyDays" type="pairings:InitialDutyDays" minOccurs="1" maxOccurs="1"></element>
             <element name="dutyDays" type="pairings:DutyDays" minOccurs="1" maxOccurs="1"></element>
         </sequence>
         <attribute name="base" type="pairings:Base" use="required"></attribute>
@@ -42,6 +42,7 @@
         <attribute name="credit" type="duration" use="required"></attribute>
         <attribute name="creditAnnotation" type="pairings:CreditAnnotation" use="optional"></attribute>
         <attribute name="perDiem" type="float" use="required"></attribute>
+        <attribute name="length" type="positiveInteger" use="required"></attribute>
     </complexType>
 
     <simpleType name="PairingAnnotation">
@@ -59,7 +60,7 @@
             <enumeration id="L" value="LegValue"></enumeration>
             <enumeration id="D" value="DutyValue"></enumeration>
             <enumeration id="T" value="TripValue"></enumeration>
-            <enumeration id="R" value="RatioValue"></enumeration><!-- meaning of (R)? -->
+            <enumeration id="R" value="RatioValue"></enumeration><!-- Duty Day RIG 1:2 -->
         </restriction>
     </simpleType>
 
@@ -123,7 +124,7 @@
 
     <complexType name="InitialDutyDays">
         <sequence>
-            <element name="dutyDay" type="pairings:InitialDutyDay" minOccurs="1" maxOccurs="31"></element>
+            <element name="initialDutyDay" type="pairings:InitialDutyDay" minOccurs="1" maxOccurs="31"></element>
         </sequence>
     </complexType>
 
@@ -152,7 +153,10 @@
 
     <complexType name="DutyDay">
         <sequence>
-            <element name="duty" type="pairings:Duty" minOccurs="1" maxOccurs="unbounded"></element>
+            <element name="checkin" type="pairings:Checkin" minOccurs="1" maxOccurs="1"></element>
+            <element name="leg" type="pairings:Leg" minOccurs="1" maxOccurs="unbounded"></element>
+            <element name="checkout" type="pairings:Checkout" minOccurs="1" maxOccurs="1"></element>
+            <element name="layover" type="pairings:Layover" minOccurs="0" maxOccurs="1"></element>
         </sequence>
         <attribute name="sequence" type="positiveInteger" use="required"></attribute>
     </complexType>
@@ -165,7 +169,7 @@
         <attribute name="block" type="duration" use="required"></attribute>
         <attribute name="credit" type="duration" use="required"></attribute>
         <attribute name="creditAnnotation" type="pairings:CreditAnnotation" use="optional"></attribute>
-        <attribute name="number" type="nonNegativeInteger" use="required"></attribute>
+        <attribute name="number" type="nonNegativeInteger" use="optional"></attribute>
     </complexType>
 
     <complexType name="GroundLeg">
@@ -208,30 +212,21 @@
         <attribute name="creditAnnotation" type="pairings:CreditAnnotation" use="optional"></attribute>
     </complexType>
 
-    <complexType name="Duty">
-        <sequence>
-            <element name="checkin" type="pairings:Checkin" minOccurs="1" maxOccurs="1"></element>
-            <element name="leg" type="pairings:Leg" minOccurs="1" maxOccurs="unbounded"></element>
-            <element name="checkout" type="pairings:Checkout" minOccurs="1" maxOccurs="1"></element>
-            <element name="layover" type="pairings:Layover" minOccurs="0" maxOccurs="1"></element>
-        </sequence>
-    </complexType>
-
     <complexType name="Layover">
         <sequence>
             <element name="accomodation" type="pairings:Accommodation" minOccurs="1" maxOccurs="1"></element>
             <element name="transportation" type="pairings:Transportation" minOccurs="1" maxOccurs="1"></element>
         </sequence>
-        <attribute name="rest" type="duration" use="required"></attribute>
+        <attribute name="layover" type="duration" use="required"></attribute>
     </complexType>
     
     <complexType name="Accommodation">
         <attribute name="details" type="string" use="optional" default="TBD"></attribute>
-        <attribute name="accomodation" type="duration" use="required"></attribute>
+        <attribute name="accomodation" type="duration" use="optional"></attribute>
     </complexType>
 
     <complexType name="Transportation">
         <attribute name="details" type="string" use="optional" default="TBD"></attribute>
-        <attribute name="transportation" type="duration"></attribute>
+        <attribute name="transportation" type="duration" use="optional"></attribute>
     </complexType>
 </schema>
