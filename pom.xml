@@ -29,7 +29,8 @@
 				<artifactId>antlr4-maven-plugin</artifactId>
 				<version>4.13.1</version>
 				<configuration>
-					<outputDirectory>${basedir}/src/main/java/org/alpa/wjamec/pairings/antlr</outputDirectory>
+					<outputDirectory>
+						${basedir}/src/main/java/org/alpa/wjamec/pairings/antlr</outputDirectory>
 					<arguments>
 						<argument>-package</argument>
 						<argument>org.alpa.wjamec.pairings.antlr</argument>
@@ -90,10 +91,25 @@
 			<version>4.0.2</version>
 		</dependency>
 		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>4.0.5</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.13.2</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.ibm.icu</groupId>
+			<artifactId>icu4j</artifactId>
+			<version>75.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>33.2.1-jre</version>
 		</dependency>
 	</dependencies>
 
