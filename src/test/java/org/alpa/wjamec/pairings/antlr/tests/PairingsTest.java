@@ -1,21 +1,51 @@
 package org.alpa.wjamec.pairings.antlr.tests;
 
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.List;
 
 import org.alpa.wjamec.pairings.antlr.PairingsLexer;
 import org.alpa.wjamec.pairings.antlr.PairingsParser;
+import org.alpa.wjamec.pairings.antlr.PairingsToXMLVisitor;
+import org.alpa.wjamec.pairings.jaxb.Base;
+import org.alpa.wjamec.pairings.jaxb.Pairing;
+import org.alpa.wjamec.pairings.jaxb.Pairings;
+import org.alpa.wjamec.pairings.jaxb.PairingsMarshaller;
+import org.alpa.wjamec.pairings.jaxb.PreliminaryPairing;
+import org.alpa.wjamec.pairings.util.PairingsQueries;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.junit.Test;
 
+import jakarta.xml.bind.JAXBException;
+
 public class PairingsTest {
 
+    private class TxtFilenameFilter implements FilenameFilter {
+
+        public static final String TXT_FILENAME_EXT = ".txt";
+
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.endsWith(TXT_FILENAME_EXT);
+        }
+
+    }
+
+    public static final String PAIRINGS_TARGET_DIR = "src/test/resources/xml";
+    public static final String PAIRINGS_PRELIMINARY_MARCH_2023 = "737 PILOT PRELIM PAIRINGS MARCH 2023.txt";
+    public static final String PAIRINGS_PRELIMINARY_NOVEMBER_2023 = "737 PILOT PRELIM PAIRINGS NOVEMBER 2023.txt";
     public static final String PAIRINGS_FINAL_APRIL_2024 = "737 PILOT FINAL PAIRINGS APRIL 2024.txt";
     public static final String PAIRINGS_PRELIMINARY_MAY_2024 = "737 PILOT PRELIM PAIRINGS MAY 2024.txt";
     public static final String PAIRINGS_FINAL_JUNE_2024 = "737 PILOT FINAL PAIRINGS JUNE 2024.txt";
-
-    public static final String SEPARATOR = "_______________________________________________________________________________________________________________________";
+    public static final String PAIRINGS_PRELIMINARY_JULY_2024 = "737 PILOT PRELIM PAIRINGS JULY 2024.txt";
+    public static final String PAIRINGS_FINAL_JULY_2024 = "737 PILOT FINAL PAIRINGS JULY 2024.txt";
 
     public static final String PAIRING1 = "TRIP #8 E3007 (OL) [1,1,0,0] YEG: 1______ effective APR 29-APR 29 no exceptions.\n"
             + "\n" + " MO TU WE TH FR SA SU DAY FLT# DEP ARR DEP ARR BLK TOG DUTY CREDIT LO A/C CREW COMP\n"
@@ -58,6 +88,7 @@ public class PairingsTest {
             + "____________________________________________________________________________________________________\n"
             + "\n" + "TAFB: 5h26 Credit Time: 4h00(D) PERDIEM: 41.62\n" + "\n"
             + "____________________________________________________________________________________________________";
+
     public static final String PAIRING4 = "TRIP #72 E900D (OL) [1,1,0,0] YEG: 1______ effective JUN 24-JUN 24 no exceptions.\n"
             + "\n" + " MO TU WE TH FR SA SU DAY FLT# DEP ARR DEP ARR BLK TOG DUTY CREDIT LO A/C CREW COMP\n"
             + " -- -- ---- ----------- --- --- ----- ----- ----- ----- ----- --------- ----- --- ---------\n"
@@ -139,18 +170,17 @@ public class PairingsTest {
             + "____________________________________________________________________________________________________";
 
     @Test
-    public void test() {
-        String pairings = "";
+    public void test() throws JAXBException, IOException {
+        String lexicalPairings = "";
         try {
-            pairings = new String(
-                    getClass().getClassLoader().getResourceAsStream(PAIRINGS_FINAL_JUNE_2024).readAllBytes());
-            pairings = pairings.substring(pairings.indexOf(SEPARATOR) + SEPARATOR.length());
+            lexicalPairings = new String(
+                    getClass().getClassLoader().getResourceAsStream(PAIRINGS_FINAL_JULY_2024).readAllBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // System.out.println(pairings);
+        System.out.println(lexicalPairings);
 
-        PairingsLexer lexer = new PairingsLexer(CharStreams.fromString(pairings));
+        PairingsLexer lexer = new PairingsLexer(CharStreams.fromString(lexicalPairings));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         tokens.fill();
 
@@ -160,8 +190,34 @@ public class PairingsTest {
 
         PairingsParser parser = new PairingsParser(tokens);
         parser.setBuildParseTree(true);
-        System.out.println(parser.pairings().toStringTree());
 
+        PairingsToXMLVisitor visitor = new PairingsToXMLVisitor();
+        Object xmlPairings = visitor.visitPairingsDocument(parser.pairingsDocument());
+        Pairings pairings = (Pairings) xmlPairings;
+
+        List<? extends PreliminaryPairing> vancouver = PairingsQueries.filterPreliminaries(pairings.getPairing(),
+                PairingsQueries.startsAtBase(Base.VANCOUVER));
+        List<? extends PreliminaryPairing> dateRange = PairingsQueries.filterPreliminaries(vancouver,
+                PairingsQueries.isOutsideDates(LocalDate.of(2024, 7, 6), LocalDate.of(2024, 7, 21)));
+        List<? extends PreliminaryPairing> creditRatio = PairingsQueries.filterPreliminaries(dateRange,
+                PairingsQueries.isAboveCreditRatio(Duration.ofHours(6)));
+        List<? extends PreliminaryPairing> noIdleDuty = PairingsQueries.filterPreliminaries(creditRatio,
+                PairingsQueries.excludesIdleDutyDays());
+        List<? extends PreliminaryPairing> noRedEyes = PairingsQueries.filterPreliminaries(noIdleDuty,
+                PairingsQueries.excludesRedEyes());
+        PairingsQueries.sortBy(noRedEyes, PairingsQueries.creditRatioThenPerDiemComparing());
+
+        pairings.getPairing().clear();
+        pairings.getPairing().addAll((List<Pairing>) noRedEyes);
+
+        PairingsMarshaller marshaller = new PairingsMarshaller();
+        String xmlPairingsFilename = PAIRINGS_FINAL_JULY_2024.replaceFirst(".txt", ".xml");
+        File pairingsFile = new File(PAIRINGS_TARGET_DIR, xmlPairingsFilename);
+        System.out.println(pairingsFile);
+        pairingsFile.createNewFile();
+        marshaller.marshal(xmlPairings, pairingsFile);
+
+        assertTrue(true);
     }
 
 }
