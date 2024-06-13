@@ -16,7 +16,7 @@ import java.util.Map;
 public final class Mappings {
 
     /**
-     * Hides default constructor.
+     * Hides the default constructor.
      */
     private Mappings() {
     }
@@ -186,4 +186,5 @@ public final class Mappings {
         tz.put("ZLO", "America/Mexico_City");
         timeZones = Collections.unmodifiableMap(tz);
     }
+
 }
