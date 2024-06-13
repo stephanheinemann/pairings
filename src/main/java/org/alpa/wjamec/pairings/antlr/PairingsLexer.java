@@ -18,7 +18,7 @@ public class PairingsLexer extends Lexer {
 		new PredictionContextCache();
 	public static final int
 		OPAR=1, CPAR=2, OBRK=3, CBRK=4, ODQT=5, CDQT=6, SLASH=7, DASH=8, TWO_DASHES=9, 
-		FOUR_DASHES=10, DASHES=11, UNDERLINE=12, TITLE_SEPARATOR=13, DOT=14, COMMA=15, 
+		FOUR_DASHES=10, DASHES=11, TITLE_SEPARATOR=12, UNDERLINE=13, DOT=14, COMMA=15, 
 		COLON=16, ADD=17, ASTERISK=18, TWICE=19, DOLLAR=20, CAPITAL_LETTER=21, 
 		LETTER=22, DAYS_OF_WEEK=23, WEEKDAY=24, MONTH=25, LONG_MONTH=26, NAT=27, 
 		NATREAL=28, HOURS=29, MINUTES=30, TIME=31, DURATION=32, REPORT=33, RELEASE=34, 
@@ -40,7 +40,7 @@ public class PairingsLexer extends Lexer {
 			"SPACE", "TAB", "RETURN", "NEWLINE", "HOUR", "DIGIT", "BASE_INITIAL", 
 			"PAIRING_LITERAL", "CREDIT_LITERAL", "UNDERSCORE", "OPAR", "CPAR", "OBRK", 
 			"CBRK", "ODQT", "CDQT", "SLASH", "DASH", "TWO_DASHES", "FOUR_DASHES", 
-			"DASHES", "UNDERLINE", "TITLE_SEPARATOR", "DOT", "COMMA", "COLON", "ADD", 
+			"DASHES", "TITLE_SEPARATOR", "UNDERLINE", "DOT", "COMMA", "COLON", "ADD", 
 			"ASTERISK", "TWICE", "DOLLAR", "CAPITAL_LETTER", "LETTER", "DAYS_OF_WEEK", 
 			"WEEKDAY", "MONTH", "LONG_MONTH", "NAT", "NATREAL", "HOURS", "MINUTES", 
 			"TIME", "DURATION", "REPORT", "RELEASE", "TBD", "GROUND", "BASE", "BASE_IATA", 
@@ -55,8 +55,8 @@ public class PairingsLexer extends Lexer {
 	private static String[] makeLiteralNames() {
 		return new String[] {
 			null, "'('", "')'", "'['", "']'", null, null, "'/'", "'-'", "'--'", "'----'", 
-			null, "'____________________________________________________________________________________________________'", 
-			"'_______________________________________________________________________________________________________________________'", 
+			null, "'_______________________________________________________________________________________________________________________'", 
+			"'____________________________________________________________________________________________________'", 
 			"'.'", "','", "':'", "'+'", "'*'", "'*2'", "'$'", null, null, null, null, 
 			null, null, null, null, null, null, null, null, "'RPT'", "'RLS'", "'TBD'", 
 			null, null, null, null, null, null, null, "'TRIP #'", "'MO TU WE TH FR SA SU DAY FLT# DEP ARR DEP ARR BLK TOG DUTY CREDIT LO A/C CREW COMP'", 
@@ -69,7 +69,7 @@ public class PairingsLexer extends Lexer {
 	private static String[] makeSymbolicNames() {
 		return new String[] {
 			null, "OPAR", "CPAR", "OBRK", "CBRK", "ODQT", "CDQT", "SLASH", "DASH", 
-			"TWO_DASHES", "FOUR_DASHES", "DASHES", "UNDERLINE", "TITLE_SEPARATOR", 
+			"TWO_DASHES", "FOUR_DASHES", "DASHES", "TITLE_SEPARATOR", "UNDERLINE", 
 			"DOT", "COMMA", "COLON", "ADD", "ASTERISK", "TWICE", "DOLLAR", "CAPITAL_LETTER", 
 			"LETTER", "DAYS_OF_WEEK", "WEEKDAY", "MONTH", "LONG_MONTH", "NAT", "NATREAL", 
 			"HOURS", "MINUTES", "TIME", "DURATION", "REPORT", "RELEASE", "TBD", "GROUND", 
@@ -181,10 +181,10 @@ public class PairingsLexer extends Lexer {
 		"\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015"+
 		"\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015"+
 		"\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015"+
-		"\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0016"+
-		"\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016"+
-		"\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016"+
-		"\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016"+
+		"\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015"+
+		"\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015"+
+		"\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015"+
+		"\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015\u0001\u0015"+
 		"\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016"+
 		"\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016"+
 		"\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016\u0001\u0016"+
@@ -342,7 +342,7 @@ public class PairingsLexer extends Lexer {
 		"\u0000\u001d\u00af\u0001\u0000\u0000\u0000\u001f\u00b1\u0001\u0000\u0000"+
 		"\u0000!\u00b3\u0001\u0000\u0000\u0000#\u00b5\u0001\u0000\u0000\u0000%"+
 		"\u00b7\u0001\u0000\u0000\u0000\'\u00ba\u0001\u0000\u0000\u0000)\u00c0"+
-		"\u0001\u0000\u0000\u0000+\u00c4\u0001\u0000\u0000\u0000-\u0129\u0001\u0000"+
+		"\u0001\u0000\u0000\u0000+\u00c4\u0001\u0000\u0000\u0000-\u013c\u0001\u0000"+
 		"\u0000\u0000/\u01a1\u0001\u0000\u0000\u00001\u01a3\u0001\u0000\u0000\u0000"+
 		"3\u01a5\u0001\u0000\u0000\u00005\u01a7\u0001\u0000\u0000\u00007\u01a9"+
 		"\u0001\u0000\u0000\u00009\u01ab\u0001\u0000\u0000\u0000;\u01ae\u0001\u0000"+
@@ -434,7 +434,7 @@ public class PairingsLexer extends Lexer {
 		"_\u0000\u0000\u0121\u0122\u0005_\u0000\u0000\u0122\u0123\u0005_\u0000"+
 		"\u0000\u0123\u0124\u0005_\u0000\u0000\u0124\u0125\u0005_\u0000\u0000\u0125"+
 		"\u0126\u0005_\u0000\u0000\u0126\u0127\u0005_\u0000\u0000\u0127\u0128\u0005"+
-		"_\u0000\u0000\u0128,\u0001\u0000\u0000\u0000\u0129\u012a\u0005_\u0000"+
+		"_\u0000\u0000\u0128\u0129\u0005_\u0000\u0000\u0129\u012a\u0005_\u0000"+
 		"\u0000\u012a\u012b\u0005_\u0000\u0000\u012b\u012c\u0005_\u0000\u0000\u012c"+
 		"\u012d\u0005_\u0000\u0000\u012d\u012e\u0005_\u0000\u0000\u012e\u012f\u0005"+
 		"_\u0000\u0000\u012f\u0130\u0005_\u0000\u0000\u0130\u0131\u0005_\u0000"+
@@ -442,7 +442,7 @@ public class PairingsLexer extends Lexer {
 		"\u0134\u0005_\u0000\u0000\u0134\u0135\u0005_\u0000\u0000\u0135\u0136\u0005"+
 		"_\u0000\u0000\u0136\u0137\u0005_\u0000\u0000\u0137\u0138\u0005_\u0000"+
 		"\u0000\u0138\u0139\u0005_\u0000\u0000\u0139\u013a\u0005_\u0000\u0000\u013a"+
-		"\u013b\u0005_\u0000\u0000\u013b\u013c\u0005_\u0000\u0000\u013c\u013d\u0005"+
+		"\u013b\u0005_\u0000\u0000\u013b,\u0001\u0000\u0000\u0000\u013c\u013d\u0005"+
 		"_\u0000\u0000\u013d\u013e\u0005_\u0000\u0000\u013e\u013f\u0005_\u0000"+
 		"\u0000\u013f\u0140\u0005_\u0000\u0000\u0140\u0141\u0005_\u0000\u0000\u0141"+
 		"\u0142\u0005_\u0000\u0000\u0142\u0143\u0005_\u0000\u0000\u0143\u0144\u0005"+

@@ -18,7 +18,7 @@ public class PairingsParser extends Parser {
 		new PredictionContextCache();
 	public static final int
 		OPAR=1, CPAR=2, OBRK=3, CBRK=4, ODQT=5, CDQT=6, SLASH=7, DASH=8, TWO_DASHES=9, 
-		FOUR_DASHES=10, DASHES=11, UNDERLINE=12, TITLE_SEPARATOR=13, DOT=14, COMMA=15, 
+		FOUR_DASHES=10, DASHES=11, TITLE_SEPARATOR=12, UNDERLINE=13, DOT=14, COMMA=15, 
 		COLON=16, ADD=17, ASTERISK=18, TWICE=19, DOLLAR=20, CAPITAL_LETTER=21, 
 		LETTER=22, DAYS_OF_WEEK=23, WEEKDAY=24, MONTH=25, LONG_MONTH=26, NAT=27, 
 		NATREAL=28, HOURS=29, MINUTES=30, TIME=31, DURATION=32, REPORT=33, RELEASE=34, 
@@ -74,8 +74,8 @@ public class PairingsParser extends Parser {
 	private static String[] makeLiteralNames() {
 		return new String[] {
 			null, "'('", "')'", "'['", "']'", null, null, "'/'", "'-'", "'--'", "'----'", 
-			null, "'____________________________________________________________________________________________________'", 
-			"'_______________________________________________________________________________________________________________________'", 
+			null, "'_______________________________________________________________________________________________________________________'", 
+			"'____________________________________________________________________________________________________'", 
 			"'.'", "','", "':'", "'+'", "'*'", "'*2'", "'$'", null, null, null, null, 
 			null, null, null, null, null, null, null, null, "'RPT'", "'RLS'", "'TBD'", 
 			null, null, null, null, null, null, null, "'TRIP #'", "'MO TU WE TH FR SA SU DAY FLT# DEP ARR DEP ARR BLK TOG DUTY CREDIT LO A/C CREW COMP'", 
@@ -88,7 +88,7 @@ public class PairingsParser extends Parser {
 	private static String[] makeSymbolicNames() {
 		return new String[] {
 			null, "OPAR", "CPAR", "OBRK", "CBRK", "ODQT", "CDQT", "SLASH", "DASH", 
-			"TWO_DASHES", "FOUR_DASHES", "DASHES", "UNDERLINE", "TITLE_SEPARATOR", 
+			"TWO_DASHES", "FOUR_DASHES", "DASHES", "TITLE_SEPARATOR", "UNDERLINE", 
 			"DOT", "COMMA", "COLON", "ADD", "ASTERISK", "TWICE", "DOLLAR", "CAPITAL_LETTER", 
 			"LETTER", "DAYS_OF_WEEK", "WEEKDAY", "MONTH", "LONG_MONTH", "NAT", "NATREAL", 
 			"HOURS", "MINUTES", "TIME", "DURATION", "REPORT", "RELEASE", "TBD", "GROUND", 
@@ -4951,7 +4951,7 @@ public class PairingsParser extends Parser {
 		"\u0000\u00a2\u0206\u0001\u0000\u0000\u0000\u00a4\u020a\u0001\u0000\u0000"+
 		"\u0000\u00a6\u00a7\u0003\u0002\u0001\u0000\u00a7\u00a8\u0003\n\u0005\u0000"+
 		"\u00a8\u0001\u0001\u0000\u0000\u0000\u00a9\u00aa\u0003\u0004\u0002\u0000"+
-		"\u00aa\u00ab\u0005\r\u0000\u0000\u00ab\u0003\u0001\u0000\u0000\u0000\u00ac"+
+		"\u00aa\u00ab\u0005\f\u0000\u0000\u00ab\u0003\u0001\u0000\u0000\u0000\u00ac"+
 		"\u00ae\t\u0000\u0000\u0000\u00ad\u00ac\u0001\u0000\u0000\u0000\u00ae\u00b1"+
 		"\u0001\u0000\u0000\u0000\u00af\u00b0\u0001\u0000\u0000\u0000\u00af\u00ad"+
 		"\u0001\u0000\u0000\u0000\u00b0\u00b2\u0001\u0000\u0000\u0000\u00b1\u00af"+
@@ -5126,7 +5126,7 @@ public class PairingsParser extends Parser {
 		"\u0018\u0000\u0000\u01f5\u0097\u0001\u0000\u0000\u0000\u01f6\u01f7\u0005"+
 		"\u001b\u0000\u0000\u01f7\u0099\u0001\u0000\u0000\u0000\u01f8\u01f9\u0003"+
 		"\u009cN\u0000\u01f9\u01fa\u0003\u009eO\u0000\u01fa\u01fb\u0003\u009cN"+
-		"\u0000\u01fb\u009b\u0001\u0000\u0000\u0000\u01fc\u01fd\u0005\f\u0000\u0000"+
+		"\u0000\u01fb\u009b\u0001\u0000\u0000\u0000\u01fc\u01fd\u0005\r\u0000\u0000"+
 		"\u01fd\u009d\u0001\u0000\u0000\u0000\u01fe\u01ff\u0003\u00a0P\u0000\u01ff"+
 		"\u0200\u0003\u00a2Q\u0000\u0200\u0201\u0003\u00a4R\u0000\u0201\u009f\u0001"+
 		"\u0000\u0000\u0000\u0202\u0203\u00057\u0000\u0000\u0203\u0204\u0005\u0010"+
