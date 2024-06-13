@@ -35,10 +35,13 @@ import org.alpa.wjamec.pairings.jaxb.PreliminaryPairing;
  */
 public class PairingsQueries {
 
+    /**
+     * Hides the default constructor.
+     */
     private PairingsQueries() {
     }
 
-    Stream<? extends PreliminaryPairing> filter(Stream<? extends PreliminaryPairing> stream,
+    public static Stream<? extends PreliminaryPairing> filter(Stream<? extends PreliminaryPairing> stream,
             Predicate<PreliminaryPairing> predicate) {
         return stream.filter(predicate);
     }
@@ -84,7 +87,7 @@ public class PairingsQueries {
     /**
      * Defines a credit-comparing comparator on preliminary pairings.
      * 
-     * @return a credit-comparing comparator on preliminary pairings
+     * @return the credit-comparing comparator on preliminary pairings
      */
     public static Comparator<PreliminaryPairing> creditComparing() {
         return Comparator.comparing(PreliminaryPairing::getCredit, javax.xml.datatype.Duration::compare);
@@ -93,7 +96,7 @@ public class PairingsQueries {
     /**
      * Defines a credit-ratio-comparing comparator on preliminary pairings.
      * 
-     * @return a credit-ratio-comparing comparator on preliminary pairings
+     * @return the credit-ratio-comparing comparator on preliminary pairings
      */
     public static Comparator<PreliminaryPairing> creditRatioComparing() {
         return (first, second) -> {
@@ -110,7 +113,7 @@ public class PairingsQueries {
     /**
      * Defines a duty-days-comparing comparator on preliminary pairings.
      * 
-     * @return a duty-days-comparing comparator on preliminary pairings
+     * @return the duty-days-comparing comparator on preliminary pairings
      */
     public static Comparator<PreliminaryPairing> dutyDaysComparing() {
         return Comparator.comparing(PreliminaryPairing::getLength, Comparable::compareTo);
@@ -119,7 +122,7 @@ public class PairingsQueries {
     /**
      * Defines a per-diem-comparing comparator on preliminary pairings.
      * 
-     * @return a per-diem-comparing comparator on preliminary pairings
+     * @return the per-diem-comparing comparator on preliminary pairings
      */
     public static Comparator<PreliminaryPairing> perDiemComparing() {
         return Comparator.comparing(PreliminaryPairing::getPerDiem, Float::compareTo);
@@ -128,7 +131,7 @@ public class PairingsQueries {
     /**
      * Defines a credit-ratio- then per-diem-comparing comparator on preliminary pairings.
      * 
-     * @return a credit ratio- then per-diem-comparing comparator on preliminary pairings
+     * @return the credit ratio- then per-diem-comparing comparator on preliminary pairings
      */
     public static Comparator<PreliminaryPairing> creditRatioThenPerDiemComparing() {
         return creditRatioComparing().thenComparing(perDiemComparing());
@@ -139,7 +142,8 @@ public class PairingsQueries {
      * 
      * @param base
      *                 the start base of a preliminary pairing
-     * @return a start base predicate on preliminary pairings that returns true if the the preliminary pairing starts at
+     * @return the start base predicate on preliminary pairings that returns true if the the preliminary pairing starts
+     *         at
      *         the base, false otherwise
      */
     public static Predicate<PreliminaryPairing> startsAtBase(Base base) {
@@ -151,7 +155,7 @@ public class PairingsQueries {
      * 
      * @param destination
      *                        the destination of a preliminary pairing
-     * @return a destination-including predicate on preliminary pairings that returns true if the preliminary pairing
+     * @return the destination-including predicate on preliminary pairings that returns true if the preliminary pairing
      *         includes the destination, false otherwise
      */
     public static Predicate<PreliminaryPairing> includesDestination(String destination) {
@@ -162,7 +166,7 @@ public class PairingsQueries {
     /**
      * Defines a red-eye-excluding predicate on preliminary pairings.
      * 
-     * @return a red-eye-excluding predicate on preliminary pairings that returns true if the preliminary pairing does
+     * @return the red-eye-excluding predicate on preliminary pairings that returns true if the preliminary pairing does
      *         not include red-eye duty days, false otherwise
      */
     public static Predicate<PreliminaryPairing> excludesRedEyes() {
@@ -174,7 +178,7 @@ public class PairingsQueries {
     /**
      * Defines an idle-duty-excluding predicate on preliminary pairings.
      * 
-     * @return an idle-duty-excluding predicate on preliminary pairings that returns true if the preliminary pairing
+     * @return the idle-duty-excluding predicate on preliminary pairings that returns true if the preliminary pairing
      *         does not include any idle duty days, false otherwise
      */
     public static Predicate<PreliminaryPairing> excludesIdleDutyDays() {
@@ -186,7 +190,7 @@ public class PairingsQueries {
      * 
      * @param date
      *                 the initial duty day date of a preliminary pairing
-     * @return a start-on-or-before-date predicate on preliminary pairings that returns true if any of the preliminary
+     * @return the start-on-or-before-date predicate on preliminary pairings that returns true if any of the preliminary
      *         pairing initial duty days is on or before the date, false otherwise
      */
     public static Predicate<PreliminaryPairing> startsOnOrBeforeDate(LocalDate date) {
@@ -201,7 +205,7 @@ public class PairingsQueries {
      * 
      * @param date
      *                 the initial duty day date of a preliminary pairing
-     * @return a starts-after-date predicate on preliminary pairings that returns true if any of the preliminary
+     * @return the starts-after-date predicate on preliminary pairings that returns true if any of the preliminary
      *         pairing initial duty days is after the date, false otherwise
      */
     public static Predicate<PreliminaryPairing> startsAfterDate(LocalDate date) {
@@ -216,7 +220,7 @@ public class PairingsQueries {
      * 
      * @param date
      *                 the final duty day date a preliminary pairing
-     * @return an ends-before-date predicate on preliminary pairings that returns true if any of the preliminary
+     * @return the ends-before-date predicate on preliminary pairings that returns true if any of the preliminary
      *         pairing final duty days is before the date, false otherwise
      */
     public static Predicate<PreliminaryPairing> endsBeforeDate(LocalDate date) {
@@ -232,7 +236,7 @@ public class PairingsQueries {
      * 
      * @param date
      *                 the final duty day date of a preliminary pairing
-     * @return an ends-on-or-after date predicate on preliminary pairings that returns true if any of the preliminary
+     * @return the ends-on-or-after date predicate on preliminary pairings that returns true if any of the preliminary
      *         pairing final duty days is on or after the date, false otherwise
      */
     public static Predicate<PreliminaryPairing> endsOnOrAfterDate(LocalDate date) {
@@ -250,7 +254,7 @@ public class PairingsQueries {
      *                  the initial duty day date of a preliminary pairing
      * @param end
      *                  the final duty day date of a preliminary pairing
-     * @return a within-dates predicate on preliminary pairings that returns true if any of the preliminary
+     * @return the within-dates predicate on preliminary pairings that returns true if any of the preliminary
      *         pairing initial and final duty day pairs are within the start and end date, false otherwise
      */
     public static Predicate<PreliminaryPairing> isWithinDates(LocalDate start, LocalDate end) {
@@ -271,7 +275,7 @@ public class PairingsQueries {
      *                  the start of the no-duty-day period
      * @param end
      *                  the end of the no-duty-day period
-     * @return an outside-dates predicate on preliminary pairings that returns true if any of the preliminary pairing
+     * @return the outside-dates predicate on preliminary pairings that returns true if any of the preliminary pairing
      *         final duty days is before the start date or any of the preliminary pairing initial duty days is after the
      *         end date, false otherwise
      */
@@ -284,7 +288,7 @@ public class PairingsQueries {
      * 
      * @param creditRatio
      *                        the credit ratio threshold of a preliminary pairing
-     * @return an is-above-credit-ratio predicate on preliminary pairings that returns true if the average duty day
+     * @return the is-above-credit-ratio predicate on preliminary pairings that returns true if the average duty day
      *         credit of the preliminary pairing is above the credit ratio threshold, false otherwise
      */
     public static Predicate<PreliminaryPairing> isAboveCreditRatio(Duration creditRatio) {
@@ -293,10 +297,20 @@ public class PairingsQueries {
                 .toString()).compareTo(creditRatio)));
     }
 
+    /**
+     * Defines a function to add the credits of preliminary pairings.
+     * 
+     * @return the function to add the credits of preliminary pairings
+     */
     public static BiFunction<PreliminaryPairing, PreliminaryPairing, Duration> addCredit() {
         return (first, second) -> Duration.parse(first.getCredit().add(second.getCredit()).toString());
     }
 
+    /**
+     * Defines a function to add the per diems of preliminary pairings.
+     * 
+     * @return the function to add the per diems of preliminary pairings
+     */
     public static BiFunction<PreliminaryPairing, PreliminaryPairing, Float> addPerDiem() {
         return (first, second) -> first.getPerDiem() + second.getPerDiem();
     }
