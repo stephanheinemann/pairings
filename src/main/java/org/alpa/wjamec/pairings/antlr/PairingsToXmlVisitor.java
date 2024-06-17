@@ -72,19 +72,50 @@ import org.alpa.wjamec.pairings.jaxb.Transportation;
 import org.alpa.wjamec.pairings.jaxb.Vehicle;
 import org.alpa.wjamec.pairings.jaxb.Weekday;
 
-public class PairingsToXMLVisitor extends PairingsBaseVisitor<Object> {
+/**
+ * Visits the ANTLR pairings AST and transforms it into a XML pairings representation.
+ * 
+ * @see Pairings
+ * 
+ * @author Stephan Heinemann
+ */
+public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
 
+    /** the pairings object factory */
     private final ObjectFactory pairingsFactory = new ObjectFactory();
 
+    /** the year of the current pairing */
     private int year = -1;
+
+    /** the effective local date of the first initial duty day of the current pairing */
     private LocalDate effectiveDate = null;
+
+    /** the airport time zone of the current airport */
     private ZoneId airportTimeZone = null;
 
-    private static void setValidity(Pairings pairings, XMLGregorianCalendar date) {
-        pairings.setValidFrom(date);
-        pairings.setValidTo(date);
+    /**
+     * Sets the validity period of the pairings.
+     * 
+     * @param pairings
+     *                      the XML parings representation
+     * @param validFrom
+     *                      the start of the validity period of the pairings
+     * @param validTo
+     *                      the end of the validity period of the pairings
+     */
+    private static void setValidity(Pairings pairings, XMLGregorianCalendar validFrom, XMLGregorianCalendar validTo) {
+        pairings.setValidFrom(validFrom);
+        pairings.setValidTo(validTo);
     }
 
+    /**
+     * Updates and if required expands the validity period of the pairings.
+     * 
+     * @param pairings
+     *                     the XML pairings representation
+     * @param date
+     *                     the valid date of a contained pairing
+     */
     private static void updateValidity(Pairings pairings, XMLGregorianCalendar date) {
         if (DatatypeConstants.GREATER == pairings.getValidFrom().compare(date)) {
             pairings.setValidFrom(date);
@@ -95,23 +126,76 @@ public class PairingsToXMLVisitor extends PairingsBaseVisitor<Object> {
         }
     }
 
+    /**
+     * Transforms a local date time and time zone to an XML Gregorian calendar.
+     * 
+     * @param localDateTime
+     *                          the local date and time
+     * @param timeZone
+     *                          the time zone of the local date and time
+     * 
+     * @return the XML Gregorian calendar representation of the local date time and time zone
+     */
+    private XMLGregorianCalendar toXmlGregorianCalendar(LocalDateTime localDateTime, ZoneId timeZone) {
+        XMLGregorianCalendar xmlCalendar = null;
+
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, timeZone);
+        GregorianCalendar calendar = GregorianCalendar.from(zonedDateTime);
+
+        try {
+            xmlCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar);
+        } catch (DatatypeConfigurationException dce) {
+            dce.printStackTrace();
+        }
+
+        return xmlCalendar;
+    }
+
+    /**
+     * Visits and transforms an ANTLR AST accommodation context to an XML accommodation representation.
+     * 
+     * @param accommodationContext
+     *                                 the ANTLR AST accommodation context
+     * @return the XML accommodation representation of the ANTLR AST accommodation context
+     * 
+     * @throws IllegalArgumentException
+     *                                      if accomodationContext is null
+     * 
+     * @see PairingsBaseVisitor#visitAccommodation(AccommodationContext)
+     */
     @Override
-    public Accommodation visitAccommodation(AccommodationContext accomodationContext) {
+    public Accommodation visitAccommodation(AccommodationContext accommodationContext) {
         Accommodation accommodation = pairingsFactory.createAccommodation();
 
-        // accommodation.setDetails(accommodationContext.getText());
-        String details = "";
-        for (int childIndex = 0; childIndex < accomodationContext.getChildCount(); childIndex++) {
-            details = details.concat(accomodationContext.getChild(childIndex).getText() + " ");
+        if (null != accommodationContext) {
+            // create a space separated details string
+            String details = "";
+            for (int childIndex = 0; childIndex < accommodationContext.getChildCount(); childIndex++) {
+                details = details.concat(accommodationContext.getChild(childIndex).getText() + " ");
+            }
+            details = details.trim();
+            accommodation.setDetails(details);
+        } else {
+            throw new IllegalArgumentException();
         }
-        details = details.trim();
-        accommodation.setDetails(details);
 
         return accommodation;
     }
 
+    /**
+     * Visits and transforms an ANTLR AST aircraft context to an XML aircraft representation.
+     * 
+     * @param aircraftContext
+     *                            the ANTLR AST aircraft context
+     * @return the XML aircraft representation of the ANTLR AST aircraft context
+     * 
+     * @throws IllegalArgumentException
+     *                                      if aircraftContext is null
+     * 
+     * @see PairingsBaseVisitor#visitAircraft(AircraftContext)
+     */
     @Override
-    public Aircraft visitAircraft(AircraftContext aircraftContext) throws IllegalArgumentException {
+    public Aircraft visitAircraft(AircraftContext aircraftContext) {
         Aircraft aircraft = null;
 
         if (null != aircraftContext) {
@@ -123,6 +207,16 @@ public class PairingsToXMLVisitor extends PairingsBaseVisitor<Object> {
         return aircraft;
     }
 
+    /**
+     * Visits and transforms an ANTLR AST airline context to an XML airline representation.
+     * 
+     * @param airlineContext
+     *                           the ANTLR AST airline context
+     * 
+     * @return the XML airline representation of the ANTLR AST airline context
+     * 
+     * @see PairingsBaseVisitor#visitAirline(AirlineContext)
+     */
     @Override
     public Airline visitAirline(AirlineContext airlineContext) {
         Airline airline = Airline.fromValue(Mappings.airlines.get("WS"));
@@ -136,8 +230,21 @@ public class PairingsToXMLVisitor extends PairingsBaseVisitor<Object> {
         return airline;
     }
 
+    /**
+     * Visits and transforms an ANTLR AST base IATA context to an XML base representation.
+     * 
+     * @param baseIataContext
+     *                            the ANTLR AST base IATA context
+     * 
+     * @return the XML base representation of the ANTLR AST base IATA context
+     * 
+     * @throws IllegalArgumentException
+     *                                      if baseIataContext is null
+     * 
+     * @see PairingsBaseVisitor#visitBaseIata(BaseIataContext)
+     */
     @Override
-    public Base visitBaseIata(BaseIataContext baseIataContext) throws IllegalArgumentException {
+    public Base visitBaseIata(BaseIataContext baseIataContext) {
         Base base = null;
 
         if (null != baseIataContext) {
@@ -149,101 +256,170 @@ public class PairingsToXMLVisitor extends PairingsBaseVisitor<Object> {
         return base;
     }
 
+    /**
+     * Visits and transforms an ANTLR AST checkin context to an XML checkin representation.
+     * 
+     * @param checkinContext
+     *                           the ANTLR AST checkin context
+     * 
+     * @return the XML checkin representation of the ANTLR AST checkin context
+     * 
+     * @throws IllegalArgumentException
+     *                                      if checkinContext is null
+     * 
+     * @see PairingsBaseVisitor#visitCheckin(CheckinContext)
+     */
     @Override
     public Checkin visitCheckin(CheckinContext checkinContext) {
         Checkin checkin = pairingsFactory.createCheckin();
 
-        // report
-        checkin.setReport(null != checkinContext.report());
+        if (null != checkinContext) {
+            // report
+            checkin.setReport(null != checkinContext.report());
 
-        // out time
-        LocalTime checkinTime = this.visitTime(checkinContext.out().time());
-        LocalDate checkinDate = this.effectiveDate;
-        LocalDateTime checkinDateTime = LocalDateTime.of(checkinDate, checkinTime);
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(checkinDateTime, this.airportTimeZone);
-        GregorianCalendar calendar = GregorianCalendar.from(zonedDateTime);
+            // out time
+            LocalTime outTime = this.visitTime(checkinContext.out().time());
+            LocalDateTime outDateTime = LocalDateTime.of(this.effectiveDate, outTime);
+            checkin.setOut(this.toXmlGregorianCalendar(outDateTime, this.airportTimeZone));
 
-        try {
-            checkin.setOut(DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar));
-        } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
-        }
+            // time on ground
+            checkin.setTimeOnGround(this.visitDuration(checkinContext.tog().duration()));
 
-        // time on ground
-        checkin.setTimeOnGround(this.visitDuration(checkinContext.tog().duration()));
-
-        // check-in duty
-        if (null != checkinContext.checkinDuty()) {
-            checkin.setDutyAnnotation(this.visitCheckinDuty(checkinContext.checkinDuty()));
+            // check-in duty
+            if (null != checkinContext.checkinDuty()) {
+                checkin.setDutyAnnotation(this.visitCheckinDuty(checkinContext.checkinDuty()));
+            }
+        } else {
+            throw new IllegalArgumentException();
         }
 
         return checkin;
     }
 
+    /**
+     * Visits and transforms an ANTLR AST checkin duty context to an XML duty annotation representation.
+     * 
+     * @param checkinDutyContext
+     *                               the ANTLR AST checkin duty context
+     * 
+     * @return the XML duty annotation representation of the ANTLR AST checkin duty context
+     * 
+     * @throws IllegalArgumentException
+     *                                      if checkinDutyContext is null
+     * 
+     * @see PairingsBaseVisitor#visitCheckinDuty(CheckinDutyContext)
+     */
     @Override
     public DutyAnnotation visitCheckinDuty(CheckinDutyContext checkinDutyContext) {
+        if (null == checkinDutyContext) {
+            throw new IllegalArgumentException();
+        }
+
         return DutyAnnotation.fromValue(Mappings.dutyAnnotations.get(checkinDutyContext.CHECKIN_DUTY().getText()));
     }
 
+    /**
+     * Visits and transforms an ANTLR AST checkout context to an XML checkout representation.
+     * 
+     * @param checkoutContext
+     *                            the ANTLR AST checkout context
+     * 
+     * @return the XML checkout representation of the ANTLR AST checkout context
+     * 
+     * @throws IllegalArgumentException
+     *                                      if checkoutContext is null
+     * 
+     * @see PairingsBaseVisitor#visitCheckout(CheckoutContext)
+     */
     @Override
     public Checkout visitCheckout(CheckoutContext checkoutContext) {
         Checkout checkout = pairingsFactory.createCheckout();
 
-        // release
-        checkout.setRelease(null != checkoutContext.release());
+        if (null != checkoutContext) {
+            // release
+            checkout.setRelease(null != checkoutContext.release());
 
-        // in time
-        LocalTime checkoutTime = this.visitTime(checkoutContext.in().time());
-        LocalDate checkoutDate = this.effectiveDate;
-        LocalDateTime checkoutDateTime = LocalDateTime.of(checkoutDate, checkoutTime);
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(checkoutDateTime, this.airportTimeZone);
-        GregorianCalendar calendar = GregorianCalendar.from(zonedDateTime);
+            // in time
+            LocalTime inTime = this.visitTime(checkoutContext.in().time());
+            LocalDateTime inDateTime = LocalDateTime.of(this.effectiveDate, inTime);
+            checkout.setIn(this.toXmlGregorianCalendar(inDateTime, this.airportTimeZone));
 
-        try {
-            checkout.setIn(DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar));
-        } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
-        }
+            // block time
+            checkout.setBlock(this.visitDuration(checkoutContext.block().duration()));
 
-        // block time
-        checkout.setBlock(this.visitDuration(checkoutContext.block().duration()));
+            // time on ground
+            checkout.setTimeOnGround(this.visitDuration(checkoutContext.tog().duration()));
 
-        // time on ground
-        checkout.setTimeOnGround(this.visitDuration(checkoutContext.tog().duration()));
+            // check-out duty time
+            checkout.setDuty(this.visitDuration(checkoutContext.checkoutDuty().duration()));
 
-        // check-out duty time
-        checkout.setDuty(this.visitDuration(checkoutContext.checkoutDuty().duration()));
+            // credit
+            checkout.setCredit(this.visitDuration(checkoutContext.credit().duration()));
 
-        // credit
-        checkout.setCredit(this.visitDuration(checkoutContext.credit().duration()));
-
-        // credit annotation
-        if (null != checkoutContext.credit().creditAnnotation()) {
-            checkout.setCreditAnnotation(this.visitCreditAnnotation(checkoutContext.credit().creditAnnotation()));
+            // credit annotation
+            if (null != checkoutContext.credit().creditAnnotation()) {
+                checkout.setCreditAnnotation(this.visitCreditAnnotation(checkoutContext.credit().creditAnnotation()));
+            }
+        } else {
+            throw new IllegalArgumentException();
         }
 
         return checkout;
     }
 
+    /**
+     * Visits and transforms an ANTLR AST credit annotation context to an XML credit annotation representation.
+     * 
+     * @param creditAnnotationContext
+     *                                    the ANTLR AST credit annotation context
+     * 
+     * @return the XML credit annotation representation of the ANTLR AST credit annotation context
+     * 
+     * @throws IllegalArgumentException
+     *                                      if creditAnnotationContext is null
+     * 
+     * @see PairingsBaseVisitor#visitCreditAnnotation(CreditAnnotationContext)
+     */
     @Override
     public CreditAnnotation visitCreditAnnotation(CreditAnnotationContext creditAnnotationContext) {
+        if (null == creditAnnotationContext) {
+            throw new IllegalArgumentException();
+        }
+
         return CreditAnnotation.fromValue(
                 Mappings.creditAnnotations.get(creditAnnotationContext.CREDIT_ANNOTATION().getText().substring(1, 2)));
     }
 
+    /**
+     * Visits and transforms an ANTLR AST crew context to an XML crew representation.
+     * 
+     * @param crewContext
+     *                        the ANTLR AST crew context
+     * 
+     * @return the XML crew representation of the ANTLR AST crew context
+     * 
+     * @throws IllegalArgumentException
+     *                                      if crewContext is null
+     * 
+     * @see PairingsBaseVisitor#visitCrew(CrewContext)
+     */
     @Override
     public Crew visitCrew(CrewContext crewContext) {
         Crew crew = pairingsFactory.createCrew();
 
-        String captains = crewContext.captains().NAT().getText();
-        String firstOfficers = crewContext.firstOfficers().NAT().getText();
-        String flightAttendants = crewContext.flightAttendants().NAT().getText();
-        String extraFlightAttendants = crewContext.extraFlightAttendants().NAT().getText();
+        if (null != crewContext) {
+            String captains = crewContext.captains().NAT().getText();
+            String firstOfficers = crewContext.firstOfficers().NAT().getText();
+            String flightAttendants = crewContext.flightAttendants().NAT().getText();
+            String extraFlightAttendants = crewContext.extraFlightAttendants().NAT().getText();
 
-        crew.setCaptains(BigInteger.valueOf(Long.parseLong(captains)));
-        crew.setFirstOfficers(BigInteger.valueOf(Long.parseLong(firstOfficers)));
-        crew.setFlightAttendants(BigInteger.valueOf(Long.parseLong(flightAttendants)));
-        crew.setExtraFlightAttendants(BigInteger.valueOf(Long.parseLong(extraFlightAttendants)));
+            crew.setCaptains(BigInteger.valueOf(Long.parseLong(captains)));
+            crew.setFirstOfficers(BigInteger.valueOf(Long.parseLong(firstOfficers)));
+            crew.setFlightAttendants(BigInteger.valueOf(Long.parseLong(flightAttendants)));
+            crew.setExtraFlightAttendants(BigInteger.valueOf(Long.parseLong(extraFlightAttendants)));
+        } else {
+            throw new IllegalArgumentException();
+        }
 
         return crew;
     }
@@ -256,14 +432,7 @@ public class PairingsToXMLVisitor extends PairingsBaseVisitor<Object> {
         LocalDate localDate = LocalDate.of(this.effectiveDate.getYear(), this.effectiveDate.getMonth(), dayOfMonth);
         LocalTime localTime = LocalTime.MIDNIGHT;
         LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, this.airportTimeZone);
-        GregorianCalendar calendar = GregorianCalendar.from(zonedDateTime);
-
-        try {
-            initialDutyDay.setDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar));
-        } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
-        }
+        initialDutyDay.setDate(this.toXmlGregorianCalendar(localDateTime, this.airportTimeZone));
 
         return initialDutyDay;
     }
@@ -307,14 +476,7 @@ public class PairingsToXMLVisitor extends PairingsBaseVisitor<Object> {
         LocalDate outDate = this.effectiveDate;
         LocalDateTime outDateTime = LocalDateTime.of(outDate, outTime);
         ZoneId originZoneId = ZoneId.of(Mappings.timeZones.get(flightLeg.getOrigin()));
-        ZonedDateTime outZonedDateTime = ZonedDateTime.of(outDateTime, originZoneId);
-        GregorianCalendar outCalendar = GregorianCalendar.from(outZonedDateTime);
-
-        try {
-            flightLeg.setOut(DatatypeFactory.newInstance().newXMLGregorianCalendar(outCalendar));
-        } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
-        }
+        flightLeg.setOut(this.toXmlGregorianCalendar(outDateTime, originZoneId));
 
         // in time
         LocalTime inTime = this.visitTime(flightLegContext.in().time());
@@ -328,14 +490,7 @@ public class PairingsToXMLVisitor extends PairingsBaseVisitor<Object> {
 
         LocalDateTime inDateTime = LocalDateTime.of(inDate, inTime);
         ZoneId destinationZoneId = ZoneId.of(Mappings.timeZones.get(flightLeg.getDestination()));
-        ZonedDateTime inZonedDateTime = ZonedDateTime.of(inDateTime, destinationZoneId);
-        GregorianCalendar inCalendar = GregorianCalendar.from(inZonedDateTime);
-
-        try {
-            flightLeg.setIn(DatatypeFactory.newInstance().newXMLGregorianCalendar(inCalendar));
-        } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
-        }
+        flightLeg.setIn(this.toXmlGregorianCalendar(inDateTime, destinationZoneId));
 
         // block time
         flightLeg.setBlock(this.visitDuration(flightLegContext.block().duration()));
@@ -400,14 +555,7 @@ public class PairingsToXMLVisitor extends PairingsBaseVisitor<Object> {
         LocalDate outDate = this.effectiveDate;
         LocalDateTime outDateTime = LocalDateTime.of(outDate, outTime);
         ZoneId originZoneId = ZoneId.of(Mappings.timeZones.get(groundLeg.getOrigin()));
-        ZonedDateTime outZonedDateTime = ZonedDateTime.of(outDateTime, originZoneId);
-        GregorianCalendar outCalendar = GregorianCalendar.from(outZonedDateTime);
-
-        try {
-            groundLeg.setOut(DatatypeFactory.newInstance().newXMLGregorianCalendar(outCalendar));
-        } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
-        }
+        groundLeg.setOut(this.toXmlGregorianCalendar(outDateTime, originZoneId));
 
         // in time
         LocalTime inTime = this.visitTime(groundLegContext.in().time());
@@ -421,14 +569,7 @@ public class PairingsToXMLVisitor extends PairingsBaseVisitor<Object> {
 
         LocalDateTime inDateTime = LocalDateTime.of(inDate, inTime);
         ZoneId destinationZoneId = ZoneId.of(Mappings.timeZones.get(groundLeg.getDestination()));
-        ZonedDateTime inZonedDateTime = ZonedDateTime.of(inDateTime, destinationZoneId);
-        GregorianCalendar inCalendar = GregorianCalendar.from(inZonedDateTime);
-
-        try {
-            groundLeg.setIn(DatatypeFactory.newInstance().newXMLGregorianCalendar(inCalendar));
-        } catch (DatatypeConfigurationException e) {
-            e.printStackTrace();
-        }
+        groundLeg.setIn(this.toXmlGregorianCalendar(inDateTime, destinationZoneId));
 
         // block time
         groundLeg.setBlock(this.visitDuration(groundLegContext.block().duration()));
@@ -653,7 +794,7 @@ public class PairingsToXMLVisitor extends PairingsBaseVisitor<Object> {
                     if (validitySet) {
                         updateValidity(pairings, idd.getDate());
                     } else {
-                        setValidity(pairings, idd.getDate());
+                        setValidity(pairings, idd.getDate(), idd.getDate());
                         validitySet = true;
                     }
                 }
@@ -664,7 +805,7 @@ public class PairingsToXMLVisitor extends PairingsBaseVisitor<Object> {
                     if (validitySet) {
                         updateValidity(pairings, idd.getDate());
                     } else {
-                        setValidity(pairings, idd.getDate());
+                        setValidity(pairings, idd.getDate(), idd.getDate());
                         validitySet = true;
                     }
                 }

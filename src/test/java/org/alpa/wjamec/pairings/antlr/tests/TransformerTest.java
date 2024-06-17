@@ -9,7 +9,7 @@ import java.util.logging.Level;
 
 import org.alpa.wjamec.pairings.antlr.PairingsLexer;
 import org.alpa.wjamec.pairings.antlr.PairingsParser;
-import org.alpa.wjamec.pairings.antlr.PairingsToXMLVisitor;
+import org.alpa.wjamec.pairings.antlr.PairingsToXmlVisitor;
 import org.alpa.wjamec.pairings.jaxb.PairingsMarshaller;
 import org.alpa.wjamec.pairings.util.TxtFilenameFilter;
 import org.alpa.wjamec.pairings.util.XmlFilenameFilter;
@@ -257,7 +257,7 @@ public class TransformerTest {
             parser.setBuildParseTree(true);
 
             // transforming
-            PairingsToXMLVisitor visitor = new PairingsToXMLVisitor();
+            PairingsToXmlVisitor visitor = new PairingsToXmlVisitor();
             Object xmlPairings = visitor.visitPairingsDocument(parser.pairingsDocument());
 
             // marshaling
