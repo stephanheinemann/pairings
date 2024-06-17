@@ -6,15 +6,19 @@
 
     <element name="pairings">
         <complexType>
-            <sequence>
-                <choice>
+            <choice>
+                <sequence>
                     <element name="pairing" type="pairings:Pairing" maxOccurs="unbounded" minOccurs="0"></element>
+                </sequence>
+                <sequence>
                     <element name="preliminaryPairing" type="pairings:PreliminaryPairing" maxOccurs="unbounded"
                         minOccurs="0"></element>
+                </sequence>
+                <sequence>
                     <element name="abbreviatedPairing" type="pairings:AbbreviatedPairing" maxOccurs="unbounded"
                         minOccurs="0"></element>
-                </choice>
-            </sequence>
+                </sequence>
+            </choice>
             <attribute name="validFrom" type="date" use="required"></attribute>
             <attribute name="validTo" type="date" use="required"></attribute>
         </complexType>
