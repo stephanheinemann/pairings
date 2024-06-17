@@ -13,11 +13,12 @@ import java.util.stream.Collectors;
 
 import org.alpa.wjamec.pairings.antlr.PairingsLexer;
 import org.alpa.wjamec.pairings.antlr.PairingsParser;
-import org.alpa.wjamec.pairings.antlr.PairingsToXMLVisitor;
+import org.alpa.wjamec.pairings.antlr.PairingsToXmlVisitor;
 import org.alpa.wjamec.pairings.jaxb.Base;
 import org.alpa.wjamec.pairings.jaxb.Pairing;
 import org.alpa.wjamec.pairings.jaxb.Pairings;
 import org.alpa.wjamec.pairings.jaxb.PairingsMarshaller;
+import org.alpa.wjamec.pairings.jaxb.PairingsTransformers;
 import org.alpa.wjamec.pairings.jaxb.PreliminaryPairing;
 import org.alpa.wjamec.pairings.util.PairingsQueries;
 import org.alpa.wjamec.pairings.util.TxtFilenameFilter;
@@ -89,7 +90,7 @@ public class QueriesTest {
         parser.setBuildParseTree(true);
 
         // transforming
-        PairingsToXMLVisitor visitor = new PairingsToXMLVisitor();
+        PairingsToXmlVisitor visitor = new PairingsToXmlVisitor();
         Object xmlPairings = visitor.visitPairingsDocument(parser.pairingsDocument());
         Pairings pairings = (Pairings) xmlPairings;
 
@@ -105,8 +106,15 @@ public class QueriesTest {
                 .collect(Collectors.toList());
         PairingsQueries.sortBy(filtered, PairingsQueries.creditRatioThenPerDiemComparing());
 
+        // reducing
+        Duration filteredCredits = PairingsQueries.addCredits(filtered);
+        Float filteredPerDiems = PairingsQueries.addPerDiems(filtered);
+        Logger.getLogger(getClass()).log(Level.INFO,
+                String.format("%d filtered accumulated credits of %s and per diems of %f", filtered.size(),
+                        filteredCredits.toString(), filteredPerDiems));
+
         List<Pairing> filteredFinals = filtered.stream().filter(Pairing.class::isInstance).map(p -> (Pairing) p)
-                .collect(Collectors.toList());
+                .toList();
         filtered.removeAll(filteredFinals);
 
         pairings.getPreliminaryPairing().clear();
@@ -115,13 +123,22 @@ public class QueriesTest {
         pairings.getPairing().clear();
         pairings.getPairing().addAll(filteredFinals);
 
+        // abbreviate pairings
+        Pairings abbreviated = PairingsTransformers.toAbbreviated(pairings);
+
         // marshaling
         PairingsMarshaller marshaller = new PairingsMarshaller();
         String xmlPairingsFilename = PAIRINGS_PRELIMINARY_JULY_2024.replaceFirst(TxtFilenameFilter.getExtension(),
                 "-filtered" + XmlFilenameFilter.getExtension());
         File pairingsFile = new File(PAIRINGS_TARGET_DIR, xmlPairingsFilename);
         pairingsFile.createNewFile();
-        marshaller.marshal(xmlPairings, pairingsFile);
+        marshaller.marshal(pairings, pairingsFile);
+
+        xmlPairingsFilename = PAIRINGS_PRELIMINARY_JULY_2024.replaceFirst(TxtFilenameFilter.getExtension(),
+                "-filtered-abbreviated" + XmlFilenameFilter.getExtension());
+        pairingsFile = new File(PAIRINGS_TARGET_DIR, xmlPairingsFilename);
+        pairingsFile.createNewFile();
+        marshaller.marshal(abbreviated, pairingsFile);
 
         assertTrue(true);
     }

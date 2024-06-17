@@ -6,14 +6,13 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.alpa.wjamec.pairings.jaxb.Base;
@@ -41,23 +40,24 @@ public class PairingsQueries {
     private PairingsQueries() {
     }
 
-    public static Stream<? extends PreliminaryPairing> filter(Stream<? extends PreliminaryPairing> stream,
-            Predicate<PreliminaryPairing> predicate) {
-        return stream.filter(predicate);
-    }
-
-    public static List<? extends PreliminaryPairing> filterPreliminaries(
-            List<? extends PreliminaryPairing> preliminaries, Predicate<PreliminaryPairing> predicate) {
-        return preliminaries.stream().filter(predicate).collect(Collectors.toList());
-    }
-
-    public static <R> R reducePreliminaries(List<? extends PreliminaryPairing> preliminaries, R identity,
-            BiFunction<R, PreliminaryPairing, R> biFunction, BinaryOperator<R> combiner) {
-        return preliminaries.stream().reduce(identity, biFunction, combiner);
-    }
-
+    /**
+     * Collects the airports of pairings, that is, the network covered by pairings.
+     * 
+     * @param pairings
+     *                     the pairings containing the origin and destination airports
+     * @return the airports of the pairings
+     */
     public static SortedSet<String> collectAirports(Pairings pairings) {
         SortedSet<String> airports = new TreeSet<>();
+
+        for (PreliminaryPairing preliminary : pairings.getPairing()) {
+            for (DutyDay dutyDay : preliminary.getDutyDays().getDutyDay()) {
+                for (Leg leg : dutyDay.getLeg()) {
+                    airports.add(leg.getOrigin());
+                    airports.add(leg.getDestination());
+                }
+            }
+        }
 
         for (Pairing pairing : pairings.getPairing()) {
             for (DutyDay dutyDay : pairing.getDutyDays().getDutyDay()) {
@@ -69,6 +69,73 @@ public class PairingsQueries {
         }
 
         return airports;
+    }
+
+    /**
+     * Gets the credit ratio for a preliminary pairing, that is, its average daily credit.
+     * 
+     * @param preliminary
+     *                        the preliminary pairing
+     * @return the credit ratio for the preliminary pairing
+     */
+    public static Duration getCreditRatio(PreliminaryPairing preliminary) {
+        return Duration.parse(getCreditRatioAttribute(preliminary).toString());
+    }
+
+    /**
+     * Gets the credit ratio attribute for a preliminary pairing, that is, its average daily credit.
+     * 
+     * @param preliminary
+     *                        the preliminary pairing
+     * @return the credit ratio attribute for the preliminary pairing
+     */
+    public static javax.xml.datatype.Duration getCreditRatioAttribute(PreliminaryPairing preliminary) {
+        return preliminary.getCredit().multiply(
+                BigDecimal.valueOf(1).divide(new BigDecimal(preliminary.getLength()), 2, RoundingMode.HALF_UP));
+    }
+
+    /**
+     * Adds the credits of preliminary pairings.
+     * 
+     * @param preliminaries
+     *                          the preliminary pairings
+     * @return the added credits of the preliminary pairings
+     */
+    public static Duration addCredits(Collection<? extends PreliminaryPairing> preliminaries) {
+        return addCredits(preliminaries.stream());
+    }
+
+    /**
+     * Adds the credits of preliminary pairings.
+     * 
+     * @param preliminaries
+     *                          the preliminary pairings
+     * @return the added credits of the preliminary pairings
+     */
+    public static Duration addCredits(Stream<? extends PreliminaryPairing> preliminaries) {
+        return preliminaries.reduce(Duration.ZERO, addCredit(), Duration::plus);
+    }
+
+    /**
+     * Adds the per diems of preliminary pairings.
+     * 
+     * @param preliminaries
+     *                          the preliminary pairings
+     * @return the added per diems of the preliminary pairings
+     */
+    public static Float addPerDiems(Collection<? extends PreliminaryPairing> preliminaries) {
+        return addPerDiems(preliminaries.stream());
+    }
+
+    /**
+     * Adds the per diems of preliminary pairings.
+     * 
+     * @param preliminaries
+     *                          the preliminary pairings
+     * @return the added per diems of the preliminary pairings
+     */
+    public static Float addPerDiems(Stream<? extends PreliminaryPairing> preliminaries) {
+        return preliminaries.reduce(0f, addPerDiem(), (a, b) -> a + b);
     }
 
     /**
@@ -99,15 +166,7 @@ public class PairingsQueries {
      * @return the credit-ratio-comparing comparator on preliminary pairings
      */
     public static Comparator<PreliminaryPairing> creditRatioComparing() {
-        return (first, second) -> {
-            Duration firstCreditRatio = Duration.parse(first.getCredit()
-                    .multiply(BigDecimal.valueOf(1).divide(new BigDecimal(first.getLength()), 2, RoundingMode.HALF_UP))
-                    .toString());
-            Duration secondCreditRatio = Duration.parse(second.getCredit()
-                    .multiply(BigDecimal.valueOf(1).divide(new BigDecimal(second.getLength()), 2, RoundingMode.HALF_UP))
-                    .toString());
-            return firstCreditRatio.compareTo(secondCreditRatio);
-        };
+        return (first, second) -> getCreditRatio(first).compareTo(getCreditRatio(second));
     }
 
     /**
@@ -196,7 +255,7 @@ public class PairingsQueries {
     public static Predicate<PreliminaryPairing> startsOnOrBeforeDate(LocalDate date) {
         return (pairing -> pairing.getInitialDutyDays().getInitialDutyDay().stream().anyMatch(initialDutyDay -> {
             ZonedDateTime dutyDateTime = ZonedDateTime.parse(initialDutyDay.getDate().toString());
-            return 0 >= dutyDateTime.toLocalDate().compareTo(date);
+            return (0 >= dutyDateTime.toLocalDate().compareTo(date));
         }));
     }
 
@@ -211,7 +270,7 @@ public class PairingsQueries {
     public static Predicate<PreliminaryPairing> startsAfterDate(LocalDate date) {
         return (pairing -> pairing.getInitialDutyDays().getInitialDutyDay().stream().anyMatch(initialDutyDay -> {
             ZonedDateTime dutyDateTime = ZonedDateTime.parse(initialDutyDay.getDate().toString());
-            return 0 < dutyDateTime.toLocalDate().compareTo(date);
+            return (0 < dutyDateTime.toLocalDate().compareTo(date));
         }));
     }
 
@@ -227,7 +286,7 @@ public class PairingsQueries {
         return (pairing -> pairing.getInitialDutyDays().getInitialDutyDay().stream().anyMatch(initialDutyDay -> {
             ZonedDateTime dutyDateTime = ZonedDateTime.parse(initialDutyDay.getDate().toString());
             dutyDateTime = dutyDateTime.plusDays(pairing.getLength().longValue() - 1);
-            return 0 > dutyDateTime.toLocalDate().compareTo(date);
+            return (0 > dutyDateTime.toLocalDate().compareTo(date));
         }));
     }
 
@@ -243,7 +302,7 @@ public class PairingsQueries {
         return (pairing -> pairing.getInitialDutyDays().getInitialDutyDay().stream().anyMatch(initialDutyDay -> {
             ZonedDateTime dutyDateTime = ZonedDateTime.parse(initialDutyDay.getDate().toString());
             dutyDateTime = dutyDateTime.plusDays(pairing.getLength().longValue() - 1);
-            return 0 <= dutyDateTime.toLocalDate().compareTo(date);
+            return (0 <= dutyDateTime.toLocalDate().compareTo(date));
         }));
     }
 
@@ -264,7 +323,7 @@ public class PairingsQueries {
         }).anyMatch(initialDutyDay -> {
             ZonedDateTime dutyDateTime = ZonedDateTime.parse(initialDutyDay.getDate().toString());
             dutyDateTime = dutyDateTime.plusDays(pairing.getLength().longValue() - 1);
-            return 0 >= dutyDateTime.toLocalDate().compareTo(end);
+            return (0 >= dutyDateTime.toLocalDate().compareTo(end));
         }));
     }
 
@@ -280,7 +339,7 @@ public class PairingsQueries {
      *         end date, false otherwise
      */
     public static Predicate<PreliminaryPairing> isOutsideDates(LocalDate start, LocalDate end) {
-        return (pairing -> endsBeforeDate(start).test(pairing) || startsAfterDate(end).test(pairing));
+        return (pairing -> (endsBeforeDate(start).test(pairing) || startsAfterDate(end).test(pairing)));
     }
 
     /**
@@ -292,9 +351,55 @@ public class PairingsQueries {
      *         credit of the preliminary pairing is above the credit ratio threshold, false otherwise
      */
     public static Predicate<PreliminaryPairing> isAboveCreditRatio(Duration creditRatio) {
-        return (pairing -> (0 < Duration.parse(pairing.getCredit()
-                .multiply(BigDecimal.valueOf(1).divide(new BigDecimal(pairing.getLength()), 2, RoundingMode.HALF_UP))
-                .toString()).compareTo(creditRatio)));
+        return (pairing -> (0 < getCreditRatio(pairing).compareTo(creditRatio)));
+    }
+
+    /**
+     * Defines a trip number predicate on pairings.
+     * 
+     * @param tripNumber
+     *                       the trip number to match pairings
+     * @return the trip number predicate on pairings that returns true if the pairing matches the trip number, false
+     *         otherwise
+     */
+    public static Predicate<Pairing> matchesTripNumber(int tripNumber) {
+        return (pairing -> (tripNumber == pairing.getTrip().intValue()));
+    }
+
+    /**
+     * Defines a trip numbers predicate on pairings.
+     * 
+     * @param tripNumbers
+     *                        the trip numbers to match pairings
+     * @return the trip numbers predicate on pairings that returns true if the pairing matches any of the trip numbers,
+     *         false otherwise
+     */
+    public static Predicate<Pairing> matchesAnyTripNumber(Collection<Integer> tripNumbers) {
+        return (pairing -> tripNumbers.contains(pairing.getTrip().intValue()));
+    }
+
+    /**
+     * Defines a pairing name predicate on pairings.
+     * 
+     * @param pairingName
+     *                        the pairing name to match pairings
+     * @return the pairing name predicate on pairings that returns true if the pairing matches the pairing name, false
+     *         otherwise
+     */
+    public static Predicate<Pairing> matchesPairingName(String pairingName) {
+        return (pairing -> pairingName.equals(pairing.getPairing()));
+    }
+
+    /**
+     * Defines a pairing names predicate on pairings.
+     * 
+     * @param pairingNames
+     *                         the pairing names to match pairings
+     * @return the pairing names predicate on pairings that returns true if the pairing matches any of the pairing
+     *         names, false otherwise
+     */
+    public static Predicate<Pairing> matchesAnyPairingName(Collection<String> pairingNames) {
+        return (pairing -> pairingNames.contains(pairing.getPairing()));
     }
 
     /**
@@ -302,8 +407,8 @@ public class PairingsQueries {
      * 
      * @return the function to add the credits of preliminary pairings
      */
-    public static BiFunction<PreliminaryPairing, PreliminaryPairing, Duration> addCredit() {
-        return (first, second) -> Duration.parse(first.getCredit().add(second.getCredit()).toString());
+    public static BiFunction<Duration, PreliminaryPairing, Duration> addCredit() {
+        return (credit, pairing) -> credit.plus(Duration.parse(pairing.getCredit().toString()));
     }
 
     /**
@@ -311,8 +416,8 @@ public class PairingsQueries {
      * 
      * @return the function to add the per diems of preliminary pairings
      */
-    public static BiFunction<PreliminaryPairing, PreliminaryPairing, Float> addPerDiem() {
-        return (first, second) -> first.getPerDiem() + second.getPerDiem();
+    public static BiFunction<Float, PreliminaryPairing, Float> addPerDiem() {
+        return (perDiem, pairing) -> (perDiem + pairing.getPerDiem());
     }
 
 }
