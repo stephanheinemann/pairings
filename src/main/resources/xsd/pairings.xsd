@@ -6,16 +6,15 @@
 
     <element name="pairings">
         <complexType>
-            <choice>
-                <sequence>
+            <sequence>
+                <choice>
                     <element name="pairing" type="pairings:Pairing" maxOccurs="unbounded" minOccurs="0"></element>
-                </sequence>
-                <sequence>
                     <element name="preliminaryPairing" type="pairings:PreliminaryPairing" maxOccurs="unbounded"
-                        minOccurs="0">
-                    </element>
-                </sequence>
-            </choice>
+                        minOccurs="0"></element>
+                    <element name="abbreviatedPairing" type="pairings:AbbreviatedPairing" maxOccurs="unbounded"
+                        minOccurs="0"></element>
+                </choice>
+            </sequence>
             <attribute name="validFrom" type="date" use="required"></attribute>
             <attribute name="validTo" type="date" use="required"></attribute>
         </complexType>
@@ -219,7 +218,7 @@
         </sequence>
         <attribute name="layover" type="duration" use="required"></attribute>
     </complexType>
-    
+
     <complexType name="Accommodation">
         <attribute name="details" type="string" use="optional" default="TBD"></attribute>
         <attribute name="accomodation" type="duration" use="optional"></attribute>
@@ -228,5 +227,15 @@
     <complexType name="Transportation">
         <attribute name="details" type="string" use="optional" default="TBD"></attribute>
         <attribute name="transportation" type="duration" use="optional"></attribute>
+    </complexType>
+
+    <complexType name="AbbreviatedPairing">
+        <attribute name="pairing" type="string" use="optional"></attribute>
+        <attribute name="days" type="string" use="required"></attribute>
+        <attribute name="length" type="positiveInteger" use="required"></attribute>
+        <attribute name="legs" type="string" use="required"></attribute>
+        <attribute name="credit" type="duration" use="required"></attribute>
+        <attribute name="creditRatio" type="duration" use="required"></attribute>
+        <attribute name="perDiem" type="float" use="required"></attribute>
     </complexType>
 </schema>
