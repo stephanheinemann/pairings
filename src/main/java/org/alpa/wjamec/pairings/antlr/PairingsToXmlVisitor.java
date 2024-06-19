@@ -73,7 +73,7 @@ import org.alpa.wjamec.pairings.jaxb.Vehicle;
 import org.alpa.wjamec.pairings.jaxb.Weekday;
 
 /**
- * Visits the ANTLR pairings AST and transforms it into a XML pairings representation.
+ * Visits the ANTLR pairings AST and transforms it into an XML pairings representation.
  * 
  * @see Pairings
  * 
@@ -84,14 +84,14 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
     /** the pairings object factory */
     private final ObjectFactory pairingsFactory = new ObjectFactory();
 
-    /** the year of the current pairing */
-    private int year = -1;
-
     /** the effective local date of the first initial duty day of the current pairing */
     private LocalDate effectiveDate = null;
 
-    /** the airport time zone of the current airport */
-    private ZoneId airportTimeZone = null;
+    /** the base time zone of the current pairing */
+    private ZoneId baseTimeZone = null;
+
+    /** the current time during the current pairing */
+    private ZonedDateTime currentTime = null;
 
     /**
      * Sets the validity period of the pairings.
@@ -136,7 +136,7 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
      * 
      * @return the XML Gregorian calendar representation of the local date time and time zone
      */
-    private XMLGregorianCalendar toXmlGregorianCalendar(LocalDateTime localDateTime, ZoneId timeZone) {
+    private static XMLGregorianCalendar toXmlGregorianCalendar(LocalDateTime localDateTime, ZoneId timeZone) {
         XMLGregorianCalendar xmlCalendar = null;
 
         ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, timeZone);
@@ -149,6 +149,32 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
         }
 
         return xmlCalendar;
+    }
+
+    /**
+     * Calculates a time at a destination based on a local date and time at an origin using a block duration
+     * between origin and destination and the respective time zones.
+     * 
+     * @param originDateTime
+     *                              the local date and time at the origin
+     * @param originZoneId
+     *                              the time zone at the origin
+     * @param block
+     *                              the block duration between the origin and destination
+     * @param destinationZoneId
+     *                              the time zone at the destination
+     * 
+     * @return the time at the destination based on the local date and time at the origin using the block duration
+     *         between origin and destination and the respective time zones
+     */
+    private static ZonedDateTime toDestinationTime(LocalDateTime originDateTime, ZoneId originZoneId, Duration block,
+            ZoneId destinationZoneId) {
+        java.time.Duration dblock = java.time.Duration.parse(block.toString());
+        ZonedDateTime zonedOutDateTime = ZonedDateTime.of(originDateTime, originZoneId);
+        ZonedDateTime zonedInDateTime = zonedOutDateTime.plus(dblock);
+        zonedInDateTime = zonedInDateTime.withZoneSameInstant(destinationZoneId);
+
+        return zonedInDateTime;
     }
 
     /**
@@ -279,11 +305,13 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
 
             // out time
             LocalTime outTime = this.visitTime(checkinContext.out().time());
-            LocalDateTime outDateTime = LocalDateTime.of(this.effectiveDate, outTime);
-            checkin.setOut(this.toXmlGregorianCalendar(outDateTime, this.airportTimeZone));
+            LocalDateTime outDateTime = LocalDateTime.of(this.currentTime.toLocalDate(), outTime);
+            checkin.setOut(toXmlGregorianCalendar(outDateTime, this.currentTime.getZone()));
+            this.currentTime = ZonedDateTime.of(outDateTime, currentTime.getZone());
 
             // time on ground
             checkin.setTimeOnGround(this.visitDuration(checkinContext.tog().duration()));
+            this.currentTime = this.currentTime.plus(java.time.Duration.parse(checkin.getTimeOnGround().toString()));
 
             // check-in duty
             if (null != checkinContext.checkinDuty()) {
@@ -341,14 +369,16 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
 
             // in time
             LocalTime inTime = this.visitTime(checkoutContext.in().time());
-            LocalDateTime inDateTime = LocalDateTime.of(this.effectiveDate, inTime);
-            checkout.setIn(this.toXmlGregorianCalendar(inDateTime, this.airportTimeZone));
+            LocalDateTime inDateTime = LocalDateTime.of(this.currentTime.toLocalDate(), inTime);
+            checkout.setIn(toXmlGregorianCalendar(inDateTime, this.currentTime.getZone()));
+            this.currentTime = ZonedDateTime.of(inDateTime, currentTime.getZone());
 
             // block time
             checkout.setBlock(this.visitDuration(checkoutContext.block().duration()));
 
             // time on ground
             checkout.setTimeOnGround(this.visitDuration(checkoutContext.tog().duration()));
+            this.currentTime = this.currentTime.plus(java.time.Duration.parse(checkout.getTimeOnGround().toString()));
 
             // check-out duty time
             checkout.setDuty(this.visitDuration(checkoutContext.checkoutDuty().duration()));
@@ -432,7 +462,7 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
         LocalDate localDate = LocalDate.of(this.effectiveDate.getYear(), this.effectiveDate.getMonth(), dayOfMonth);
         LocalTime localTime = LocalTime.MIDNIGHT;
         LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
-        initialDutyDay.setDate(this.toXmlGregorianCalendar(localDateTime, this.airportTimeZone));
+        initialDutyDay.setDate(toXmlGregorianCalendar(localDateTime, this.baseTimeZone));
 
         return initialDutyDay;
     }
@@ -456,7 +486,7 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
         int month = Mappings.months.get(effectivenessContext.period().month().MONTH().getText());
         int dayOfMonth = Integer.parseInt(effectivenessContext.period().dayToMonth().dayOfMonth().NAT().getText());
 
-        return LocalDate.of(this.year, month, dayOfMonth);
+        return LocalDate.of(this.effectiveDate.getYear(), month, dayOfMonth);
     }
 
     @Override
@@ -472,28 +502,24 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
         // out time
         LocalTime outTime = this.visitTime(flightLegContext.out().time());
 
-        // first departure date of the month
-        LocalDate outDate = this.effectiveDate;
+        // first departure date of the month (assuming no local time changes between initial duty days)
+        LocalDate outDate = this.currentTime.toLocalDate();
         LocalDateTime outDateTime = LocalDateTime.of(outDate, outTime);
         ZoneId originZoneId = ZoneId.of(Mappings.timeZones.get(flightLeg.getOrigin()));
-        flightLeg.setOut(this.toXmlGregorianCalendar(outDateTime, originZoneId));
+        flightLeg.setOut(toXmlGregorianCalendar(outDateTime, originZoneId));
+
+        // block time
+        flightLeg.setBlock(this.visitDuration(flightLegContext.block().duration()));
 
         // in time
         LocalTime inTime = this.visitTime(flightLegContext.in().time());
 
-        // first arrival date of the month
-        LocalDate inDate = this.effectiveDate;
-        // TODO: think about date change again
-        if (inTime.isBefore(outTime)) {
-            inDate = inDate.plusDays(1);
-        }
-
-        LocalDateTime inDateTime = LocalDateTime.of(inDate, inTime);
+        // first arrival date of the month (assuming no local time changes between initial duty days)
         ZoneId destinationZoneId = ZoneId.of(Mappings.timeZones.get(flightLeg.getDestination()));
-        flightLeg.setIn(this.toXmlGregorianCalendar(inDateTime, destinationZoneId));
-
-        // block time
-        flightLeg.setBlock(this.visitDuration(flightLegContext.block().duration()));
+        this.currentTime = toDestinationTime(outDateTime, originZoneId, flightLeg.getBlock(), destinationZoneId);
+        LocalDate inDate = this.currentTime.toLocalDate();
+        LocalDateTime inDateTime = LocalDateTime.of(inDate, inTime);
+        flightLeg.setIn(toXmlGregorianCalendar(inDateTime, destinationZoneId));
 
         // credit
         flightLeg.setCredit(this.visitDuration(flightLegContext.credit().duration()));
@@ -523,6 +549,8 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
 
             if (null != flightLegContext.tog().duration()) {
                 flightLeg.setTimeOnGround(this.visitDuration(flightLegContext.tog().duration()));
+                this.currentTime = this.currentTime
+                        .plus(java.time.Duration.parse(flightLeg.getTimeOnGround().toString()));
             }
 
             if (null != flightLegContext.tog().ASTERISK()) {
@@ -551,28 +579,24 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
         // out time
         LocalTime outTime = this.visitTime(groundLegContext.out().time());
 
-        // first departure date of the month
-        LocalDate outDate = this.effectiveDate;
+        // block time
+        groundLeg.setBlock(this.visitDuration(groundLegContext.block().duration()));
+
+        // first departure date of the month (assuming no local time changes between initial duty days)
+        LocalDate outDate = this.currentTime.toLocalDate();
         LocalDateTime outDateTime = LocalDateTime.of(outDate, outTime);
         ZoneId originZoneId = ZoneId.of(Mappings.timeZones.get(groundLeg.getOrigin()));
-        groundLeg.setOut(this.toXmlGregorianCalendar(outDateTime, originZoneId));
+        groundLeg.setOut(toXmlGregorianCalendar(outDateTime, originZoneId));
 
         // in time
         LocalTime inTime = this.visitTime(groundLegContext.in().time());
 
-        // first arrival date of the month
-        LocalDate inDate = this.effectiveDate;
-        // TODO: think about date change again
-        if (inTime.isBefore(outTime)) {
-            inDate = inDate.plusDays(1);
-        }
-
-        LocalDateTime inDateTime = LocalDateTime.of(inDate, inTime);
+        // first arrival date of the month (assuming no local time changes between initial duty days)
         ZoneId destinationZoneId = ZoneId.of(Mappings.timeZones.get(groundLeg.getDestination()));
-        groundLeg.setIn(this.toXmlGregorianCalendar(inDateTime, destinationZoneId));
-
-        // block time
-        groundLeg.setBlock(this.visitDuration(groundLegContext.block().duration()));
+        this.currentTime = toDestinationTime(outDateTime, originZoneId, groundLeg.getBlock(), destinationZoneId);
+        LocalDate inDate = this.currentTime.toLocalDate();
+        LocalDateTime inDateTime = LocalDateTime.of(inDate, inTime);
+        groundLeg.setIn(toXmlGregorianCalendar(inDateTime, destinationZoneId));
 
         // credit
         groundLeg.setCredit(this.visitDuration(groundLegContext.credit().duration()));
@@ -604,6 +628,7 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
 
         // lay-over duration
         layover.setLayover(this.visitDuration(layoverContext.layoverDurations().layoverDuration().duration()));
+        this.currentTime = this.currentTime.plus(java.time.Duration.parse(layover.getLayover().toString()));
 
         // accommodation details and duration
         Accommodation accommodation = this.visitAccommodation(layoverContext.accommodation());
@@ -694,14 +719,16 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
         int dutyDayIndex = 0;
         pairing.setDutyDays(pairingsFactory.createDutyDays());
 
+        // base time zone
+        String baseIata = Mappings.bases.get(pairing.getBase().value());
+        this.baseTimeZone = ZoneId.of(Mappings.timeZones.get(baseIata));
+
         for (ContentContext contentContext : contentsContext.content()) {
             if (null != contentContext.calendarWeek()) {
                 int dayOfWeek = 1;
                 CalendarDaysOfMonthContext cdsomc = contentContext.calendarWeek().calendarDaysOfMonth();
                 for (CalendarDayOfMonthContext cdomc : cdsomc.calendarDayOfMonth()) {
                     if (null != cdomc.dayOfMonth()) {
-                        String airportIata = Mappings.iataBases.get(pairing.getBase().value());
-                        this.airportTimeZone = ZoneId.of(Mappings.timeZones.get(airportIata));
                         InitialDutyDay initialDutyDay = this.visitDayOfMonth(cdomc.dayOfMonth());
                         initialDutyDay.setWeekday(Weekday.fromValue(Mappings.weekdays.get(dayOfWeek)));
                         pairing.getInitialDutyDays().getInitialDutyDay().add(initialDutyDay);
@@ -720,8 +747,7 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
                 dutyDayIndex = pairing.getDutyDays().getDutyDay().size();
 
                 if (1 == dutyDayIndex) {
-                    String airportIata = Mappings.iataBases.get(pairing.getBase().value());
-                    this.airportTimeZone = ZoneId.of(Mappings.timeZones.get(airportIata));
+                    this.currentTime = ZonedDateTime.of(this.effectiveDate, LocalTime.MIDNIGHT, this.baseTimeZone);
                 }
 
                 Checkin checkin = this.visitCheckin(contentContext.checkin());
@@ -734,7 +760,6 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
                 // legs
                 Leg leg = this.visitLeg(contentContext.leg());
                 pairing.getDutyDays().getDutyDay().get(dutyDayIndex - 1).getLeg().add(leg);
-                this.airportTimeZone = ZoneId.of(Mappings.timeZones.get(leg.getDestination()));
 
                 // duty
                 int dutySequence = 0;
@@ -817,7 +842,9 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
 
     @Override
     public Pairings visitPairingsDocument(PairingsDocumentContext pairingsDocumentContext) {
-        this.year = Integer.parseInt(pairingsDocumentContext.titlePage().title().year().NAT().getText());
+        int year = Integer.parseInt(pairingsDocumentContext.titlePage().title().year().NAT().getText());
+        int month = Mappings.months.get(pairingsDocumentContext.titlePage().title().longMonth().LONG_MONTH().getText());
+        this.effectiveDate = LocalDate.of(year, month, 1);
 
         return this.visitPairings(pairingsDocumentContext.pairings());
     }
@@ -835,7 +862,6 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
     public Transportation visitTransportation(TransportationContext transportationContext) {
         Transportation transportation = pairingsFactory.createTransportation();
 
-        // transportation.setDetails(transportationContext.getText());
         String details = "";
         for (int childIndex = 0; childIndex < transportationContext.getChildCount(); childIndex++) {
             details = details.concat(transportationContext.getChild(childIndex).getText() + " ");

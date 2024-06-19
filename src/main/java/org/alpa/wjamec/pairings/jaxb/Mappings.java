@@ -21,13 +21,10 @@ public final class Mappings {
     private Mappings() {
     }
 
-    /** maps IATA airport bases to city base names */
+    /** maps IATA airport bases to city base names and vice versa */
     public static final Map<String, String> bases = Map.of("YEG", "Edmonton", "YVR", "Vancouver", "YWG", "Winnipeg",
-            "YYC", "Calgary", "YYZ", "Toronto");
-
-    /** maps city base names to IATA airport bases */
-    public static final Map<String, String> iataBases = Map.of("Edmonton", "YEG", "Vancouver", "YVR", "Winnipeg", "YWG",
-            "Calgary", "YYC", "Toronto", "YYZ");
+            "YYC", "Calgary", "YYZ", "Toronto", "Edmonton", "YEG", "Vancouver", "YVR", "Winnipeg", "YWG", "Calgary",
+            "YYC", "Toronto", "YYZ");
 
     /** maps pairing annotation codes to pairing annotations */
     public static final Map<String, String> pairingAnnotations = Map.of("OT", "OptimizedTrip", "OL", "OptimizedLock",
@@ -57,7 +54,7 @@ public final class Mappings {
     public static final Map<Integer, String> weekdays = Map.of(1, "Monday", 2, "Tuesday", 3, "Wednesday", 4, "Thursday",
             5, "Friday", 6, "Saturday", 7, "Sunday");
 
-    /** maps short month names to month values */
+    /** maps month names to month values */
     public static final Map<String, Integer> months;
     static {
         Map<String, Integer> m = new HashMap<>();
@@ -73,6 +70,17 @@ public final class Mappings {
         m.put("OCT", 10);
         m.put("NOV", 11);
         m.put("DEC", 12);
+        m.put("JANUARY", 1);
+        m.put("FEBRUARY", 2);
+        m.put("MARCH", 3);
+        m.put("APRIL", 4);
+        m.put("JUNE", 6);
+        m.put("JULY", 7);
+        m.put("AUGUST", 8);
+        m.put("SEPTEMBER", 9);
+        m.put("OCTOBER", 10);
+        m.put("NOVEMBER", 11);
+        m.put("DECEMBER", 12);
         months = Collections.unmodifiableMap(m);
     }
 
