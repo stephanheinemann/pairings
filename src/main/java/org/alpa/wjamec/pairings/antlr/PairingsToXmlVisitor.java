@@ -1091,8 +1091,15 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
     public Pairings visitPairingsDocument(PairingsDocumentContext pairingsDocumentContext) {
         if (null != pairingsDocumentContext) {
             int year = Integer.parseInt(pairingsDocumentContext.titlePage().title().year().NAT().getText());
-            int month = Mappings.months
-                    .get(pairingsDocumentContext.titlePage().title().longMonth().LONG_MONTH().getText());
+            int month = -1;
+
+            if (null != pairingsDocumentContext.titlePage().title().month()) {
+                month = Mappings.months.get(pairingsDocumentContext.titlePage().title().month().MONTH().getText());
+            } else if (null != pairingsDocumentContext.titlePage().title().longMonth()) {
+                month = Mappings.months
+                        .get(pairingsDocumentContext.titlePage().title().longMonth().LONG_MONTH().getText());
+            }
+
             this.effectiveDate = LocalDate.of(year, month, 1);
         } else {
             throw new IllegalArgumentException();
@@ -1185,6 +1192,7 @@ public class PairingsToXmlVisitor extends PairingsBaseVisitor<Object> {
         Transportation transportation = pairingsFactory.createTransportation();
 
         if (null != transportationContext) {
+            // create a space separated details string
             String details = "";
             for (int childIndex = 0; childIndex < transportationContext.getChildCount(); childIndex++) {
                 details = details.concat(transportationContext.getChild(childIndex).getText() + " ");

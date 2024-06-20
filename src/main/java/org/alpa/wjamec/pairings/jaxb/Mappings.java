@@ -98,6 +98,7 @@ public final class Mappings {
         tz.put("BFS", "Europe/Dublin");
         tz.put("BGI", "America/Barbados");
         tz.put("BNA", "America/Chicago");
+        tz.put("BON", "America/Curacao");
         tz.put("BOS", "America/New_York");
         tz.put("BZE", "America/Belize");
         tz.put("CCC", "America/Havana");
@@ -126,11 +127,13 @@ public final class Mappings {
         tz.put("LAX", "America/Los_Angeles");
         tz.put("LGA", "America/New_York");
         tz.put("LGW", "Europe/London");
+        tz.put("LHR", "Europe/London");
         tz.put("LIH", "Pacific/Honolulu");
         tz.put("LIR", "America/Costa_Rica");
         tz.put("LTO", "America/Mazatlan");
         tz.put("MBJ", "America/Jamaica");
         tz.put("MCO", "America/New_York");
+        tz.put("MEX", "America/Mexico_City");
         tz.put("MIA", "America/New_York");
         tz.put("MID", "America/Mexico_City");
         tz.put("MSP", "America/Chicago");
@@ -153,6 +156,7 @@ public final class Mappings {
         tz.put("SJD", "America/Mazatlan");
         tz.put("SJU", "America/Puerto_Rico");
         tz.put("SNA", "America/Los_Angeles");
+        tz.put("SNU", "America/Havana");
         tz.put("SXM", "America/Guadeloupe");
         tz.put("TPA", "America/New_York");
         tz.put("UVF", "America/St_Lucia");
@@ -165,6 +169,7 @@ public final class Mappings {
         tz.put("YHM", "America/Montreal");
         tz.put("YHU", "America/Montreal");
         tz.put("YHZ", "America/Halifax");
+        tz.put("YKA", "America/Vancouver");
         tz.put("YKF", "America/Montreal");
         tz.put("YLW", "America/Vancouver");
         tz.put("YMM", "America/Edmonton");
