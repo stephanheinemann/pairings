@@ -77,7 +77,7 @@ public class QueriesTest {
     @Test
     public void test() throws IOException, JAXBException {
         // reading
-        File txtPairingsFile = new File(PAIRINGS_RESOURCES_DIR, PAIRINGS_PRELIMINARY_JULY_2024);
+        File txtPairingsFile = new File(PAIRINGS_RESOURCES_DIR, PAIRINGS_FINAL_JULY_2024);
         String lexicalPairings = new String(Files.readAllBytes(txtPairingsFile.toPath()));
 
         // lexing
@@ -128,13 +128,13 @@ public class QueriesTest {
 
         // marshaling
         PairingsMarshaller marshaller = new PairingsMarshaller();
-        String xmlPairingsFilename = PAIRINGS_PRELIMINARY_JULY_2024.replaceFirst(TxtFilenameFilter.getExtension(),
+        String xmlPairingsFilename = PAIRINGS_FINAL_JULY_2024.replaceFirst(TxtFilenameFilter.getExtension(),
                 "-filtered" + XmlFilenameFilter.getExtension());
         File pairingsFile = new File(PAIRINGS_TARGET_DIR, xmlPairingsFilename);
         pairingsFile.createNewFile();
         marshaller.marshal(pairings, pairingsFile);
 
-        xmlPairingsFilename = PAIRINGS_PRELIMINARY_JULY_2024.replaceFirst(TxtFilenameFilter.getExtension(),
+        xmlPairingsFilename = PAIRINGS_FINAL_JULY_2024.replaceFirst(TxtFilenameFilter.getExtension(),
                 "-filtered-abbreviated" + XmlFilenameFilter.getExtension());
         pairingsFile = new File(PAIRINGS_TARGET_DIR, xmlPairingsFilename);
         pairingsFile.createNewFile();
