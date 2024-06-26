@@ -37,6 +37,16 @@ public class PairingsException extends Exception {
     private static final long serialVersionUID = 1L;
 
     /**
+     * Constructs a pairings exception from a message.
+     * 
+     * @param message
+     *                    the message of the pairings exception
+     */
+    public PairingsException(String message) {
+        super(message);
+    }
+
+    /**
      * Constructs a pairings exception from a cause.
      * 
      * @param cause

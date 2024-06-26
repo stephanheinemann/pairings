@@ -40,8 +40,8 @@ import com.github.rvesse.airline.parser.errors.ParseException;
  * 
  * @author Stephan Heinemann
  */
-@Cli(name = "pairalyze", description = "WestJet ALPA MEC Pairing Analyzer", defaultCommand = Help.class, commands = {
-        TransformCommand.class, Help.class })
+@Cli(name = "pairalyze", description = "WestJet ALPA MEC Pairings Analyzer", defaultCommand = Help.class, commands = {
+        TransformCommand.class, FilterCommand.class, Help.class })
 @Copyright(startYear = 2024, holder = "Stephan Heinemann")
 @Version(sources = "META-INF/maven/org.alpa.wjamec/pairings/pom.properties", suppressOnError = true)
 public class CommandLine {

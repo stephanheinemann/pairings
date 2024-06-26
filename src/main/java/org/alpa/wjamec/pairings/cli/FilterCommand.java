@@ -27,10 +27,12 @@
 package org.alpa.wjamec.pairings.cli;
 
 import org.alpa.wjamec.pairings.exceptions.PairingsException;
+import org.alpa.wjamec.pairings.jaxb.Base;
 import org.alpa.wjamec.pairings.jaxb.Pairings;
 import org.alpa.wjamec.pairings.jaxb.PairingsMarshaller;
 import org.alpa.wjamec.pairings.jaxb.PairingsTransformers;
 import org.alpa.wjamec.pairings.util.PairingsFiles;
+import org.alpa.wjamec.pairings.util.PairingsQueries;
 import org.alpa.wjamec.pairings.util.TextFilenameFilter;
 import org.alpa.wjamec.pairings.util.XmlFilenameFilter;
 
@@ -38,6 +40,7 @@ import com.github.rvesse.airline.HelpOption;
 import com.github.rvesse.airline.annotations.AirlineModule;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.annotations.restrictions.AllowedEnumValues;
 import com.github.rvesse.airline.annotations.restrictions.EndsWith;
 import com.github.rvesse.airline.annotations.restrictions.File;
 import com.github.rvesse.airline.annotations.restrictions.NoOptionLikeValues;
@@ -47,24 +50,24 @@ import com.github.rvesse.airline.annotations.restrictions.Required;
 import jakarta.xml.bind.JAXBException;
 
 /**
- * Realizes a pairings command line interface transform command.
+ * Realizes a pairings command line interface filter command.
  * 
  * @author Stephan Heinemann
  * 
  */
-@Command(name = "transform", description = "Transform a pairings file into an XML representation")
-public class TransformCommand implements Runnable {
+@Command(name = "filter", description = "Filter a pairings file and transforms it into a corresponding XML representation")
+public class FilterCommand implements Runnable {
 
-    /** contains the help of this transform command */
+    /** contains the help of this filter command */
     @AirlineModule
-    private HelpOption<TransformCommand> help;
+    private HelpOption<FilterCommand> help;
 
-    /** determines whether or not the transformed pairings are abbreviated */
-    @Option(name = { "-a", "--abbreviate" }, description = "Abbreviate the transformed pairings")
+    /** determines whether or not the filtered pairings are abbreviated */
+    @Option(name = { "-a", "--abbreviate" }, description = "Abbreviate the filtered pairings")
     private boolean abbreviate = false;
 
-    /** specifies the parings file to be transformed */
-    @Option(arity = 1, description = "The name of the pairings file to be transformed", name = { "-i", "--input" })
+    /** specifies the parings file to be filtered */
+    @Option(arity = 1, description = "The name of the pairings file to be filtered", name = { "-i", "--input" })
     @File(mustExist = true, readable = true, writable = false)
     @EndsWith(suffixes = { TextFilenameFilter.TEXT_FILENAME_EXT, XmlFilenameFilter.XML_FILENAME_EXT })
     @Once
@@ -72,16 +75,23 @@ public class TransformCommand implements Runnable {
     @NoOptionLikeValues
     private String input;
 
-    /** specifies the transformed pairings file */
-    @Option(arity = 1, description = "The name of the resulting transformed pairings file", name = { "-o", "--output" })
+    /** specifies the filtered pairings file */
+    @Option(arity = 1, description = "The name of the resulting filtered pairings file", name = { "-o", "--output" })
     @File(mustExist = false, readable = false, writable = true)
     @EndsWith(suffixes = XmlFilenameFilter.XML_FILENAME_EXT)
     @Once
     @NoOptionLikeValues
     private String output;
 
+    /** specifies the base filter */
+    @Option(arity = 1, description = "Filter all pairings with the specified base location", name = { "-b", "--base" })
+    @AllowedEnumValues(value = Base.class)
+    @NoOptionLikeValues
+    @Once
+    private String base;
+
     /**
-     * Runs this transform command.
+     * Runs this filter command.
      */
     @Override
     public void run() {
@@ -96,15 +106,30 @@ public class TransformCommand implements Runnable {
                 }
 
                 if (null != pairings) {
+                    // base filter
+                    if (null != this.base) {
+                        if (!pairings.getPreliminaryPairing().isEmpty()) {
+                            pairings.getPreliminaryPairing()
+                                    .removeIf(PairingsQueries.startsAtBase(Base.valueOf(this.base)).negate());
+                        } else if (!pairings.getPairing().isEmpty()) {
+                            pairings.getPairing()
+                                    .removeIf(PairingsQueries.startsAtBase(Base.valueOf(this.base)).negate());
+                        } else {
+                            throw new PairingsException("unsupported pairings format for filtering");
+                        }
+                    }
+
+                    // TODO: more filters
+
                     if (null != this.output) {
-                        // write transformed pairings to output file
+                        // write filtered pairings to output file
                         if (this.abbreviate) {
                             PairingsFiles.writeXmlPairings(this.output, PairingsTransformers.toAbbreviated(pairings));
                         } else {
                             PairingsFiles.writeXmlPairings(this.output, pairings);
                         }
                     } else {
-                        // write transformed pairings to standard out
+                        // write filtered pairings to standard out
                         PairingsMarshaller pairingsMarshaller = new PairingsMarshaller();
                         if (this.abbreviate) {
                             pairingsMarshaller.marshal(PairingsTransformers.toAbbreviated(pairings), System.out);
@@ -112,9 +137,11 @@ public class TransformCommand implements Runnable {
                             pairingsMarshaller.marshal(pairings, System.out);
                         }
                     }
+
                 }
+
             } catch (PairingsException | JAXBException e) {
-                System.err.println(String.format("Error: Unable to transform pairings file %s", this.input));
+                System.err.println(String.format("Error: Unable to filter pairings file %s", this.input));
                 System.exit(1);
             }
         }
