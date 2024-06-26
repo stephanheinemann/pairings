@@ -24,47 +24,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.alpa.wjamec.pairings.util;
-
-import java.io.File;
-import java.io.FilenameFilter;
+package org.alpa.wjamec.pairings.exceptions;
 
 /**
- * Filters filenames with a text filename extension.
- * 
- * @see FilenameFilter
+ * Realizes an exception encapsulating occurrences while processing pairings.
  * 
  * @author Stephan Heinemann
  */
-public class TxtFilenameFilter implements FilenameFilter {
+public class PairingsException extends Exception {
 
-    /** the text filename extension */
-    public static final String TXT_FILENAME_EXT = ".txt";
+    /** the serial version identifier */
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Determines whether or not a filename has a text filename extension.
+     * Constructs a pairings exception from a cause.
      * 
-     * @param dir
-     *                 the directory in which the file was found
-     * @param name
-     *                 the filename of the file
-     * 
-     * @return true if the filename has a text filename extension, false otherwise
-     * 
-     * @see FilenameFilter#accept(File, String)
+     * @param cause
+     *                  the cause of the pairings exception
      */
-    @Override
-    public boolean accept(File dir, String name) {
-        return name.endsWith(TXT_FILENAME_EXT);
+    public PairingsException(Throwable cause) {
+        super(cause);
     }
 
     /**
-     * Gets the extension of a text filename.
+     * Constructs a pairings exception from a message and a cause.
      * 
-     * @return the extension of a text filename
+     * @param message
+     *                    the message of the pairings exception
+     * @param cause
+     *                    the cause of the pairings exception
      */
-    public static String getExtension() {
-        return TXT_FILENAME_EXT;
+    public PairingsException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

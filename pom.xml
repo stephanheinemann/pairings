@@ -161,8 +161,38 @@
 				<configuration>
 					<instructions>
 						<_removeheaders>Built-By</_removeheaders>
+						<!--Export-Package>org.alpa.wjamec.pairings.*</Export-Package>
+						<Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive-->
 					</instructions>
+					<!--archive>
+						<manifest>
+							<mainClass>org.alpa.wjamec.pairings.cli.CommandLine</mainClass>
+						</manifest>
+					</archive-->
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.6.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>
+										org.alpa.wjamec.pairings.cli.CommandLine</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>external.atlassian.jgitflow</groupId>
@@ -255,6 +285,11 @@
 			<artifactId>junit</artifactId>
 			<version>4.13.2</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.rvesse</groupId>
+			<artifactId>airline</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 	</dependencies>
 

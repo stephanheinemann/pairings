@@ -37,7 +37,7 @@ import org.alpa.wjamec.pairings.antlr.PairingsLexer;
 import org.alpa.wjamec.pairings.antlr.PairingsParser;
 import org.alpa.wjamec.pairings.antlr.PairingsToXmlVisitor;
 import org.alpa.wjamec.pairings.jaxb.PairingsMarshaller;
-import org.alpa.wjamec.pairings.util.TxtFilenameFilter;
+import org.alpa.wjamec.pairings.util.TextFilenameFilter;
 import org.alpa.wjamec.pairings.util.XmlFilenameFilter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -262,7 +262,7 @@ public class TransformerTest {
     public void test() throws IOException, JAXBException {
 
         File pairingsResourcesDir = new File(PAIRINGS_RESOURCES_DIR);
-        File[] txtPairingsFiles = pairingsResourcesDir.listFiles(new TxtFilenameFilter());
+        File[] txtPairingsFiles = pairingsResourcesDir.listFiles(new TextFilenameFilter());
         File pairingsTargetDir = new File(PAIRINGS_TARGET_DIR);
         pairingsTargetDir.mkdirs();
 
@@ -288,7 +288,7 @@ public class TransformerTest {
 
             // marshaling
             PairingsMarshaller marshaller = new PairingsMarshaller();
-            String xmlPairingsFilename = txtPairingsFile.getName().replaceFirst(TxtFilenameFilter.getExtension(),
+            String xmlPairingsFilename = txtPairingsFile.getName().replaceFirst(TextFilenameFilter.getExtension(),
                     XmlFilenameFilter.getExtension());
             File xmlPairingsFile = new File(PAIRINGS_TARGET_DIR, xmlPairingsFilename);
             xmlPairingsFile.createNewFile();

@@ -47,7 +47,7 @@ import org.alpa.wjamec.pairings.jaxb.PairingsMarshaller;
 import org.alpa.wjamec.pairings.jaxb.PairingsTransformers;
 import org.alpa.wjamec.pairings.jaxb.PreliminaryPairing;
 import org.alpa.wjamec.pairings.util.PairingsQueries;
-import org.alpa.wjamec.pairings.util.TxtFilenameFilter;
+import org.alpa.wjamec.pairings.util.TextFilenameFilter;
 import org.alpa.wjamec.pairings.util.XmlFilenameFilter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -154,13 +154,13 @@ public class QueriesTest {
 
         // marshaling
         PairingsMarshaller marshaller = new PairingsMarshaller();
-        String xmlPairingsFilename = PAIRINGS_FINAL_JULY_2024.replaceFirst(TxtFilenameFilter.getExtension(),
+        String xmlPairingsFilename = PAIRINGS_FINAL_JULY_2024.replaceFirst(TextFilenameFilter.getExtension(),
                 "-filtered" + XmlFilenameFilter.getExtension());
         File pairingsFile = new File(PAIRINGS_TARGET_DIR, xmlPairingsFilename);
         pairingsFile.createNewFile();
         marshaller.marshal(pairings, pairingsFile);
 
-        xmlPairingsFilename = PAIRINGS_FINAL_JULY_2024.replaceFirst(TxtFilenameFilter.getExtension(),
+        xmlPairingsFilename = PAIRINGS_FINAL_JULY_2024.replaceFirst(TextFilenameFilter.getExtension(),
                 "-filtered-abbreviated" + XmlFilenameFilter.getExtension());
         pairingsFile = new File(PAIRINGS_TARGET_DIR, xmlPairingsFilename);
         pairingsFile.createNewFile();
