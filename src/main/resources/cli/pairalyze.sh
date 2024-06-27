@@ -26,6 +26,4 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-
-# TODO: proper location and name using assembly plugin
-java -jar target/pairings*shaded.jar "$@"
+java -jar pairings*shaded.jar "$@"
