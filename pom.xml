@@ -204,15 +204,7 @@
 				<configuration>
 					<instructions>
 						<_removeheaders>Built-By</_removeheaders>
-						<!--Export-Package>org.alpa.wjamec.pairings.*</Export-Package>
-						<Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
-						<Embed-Transitive>true</Embed-Transitive-->
 					</instructions>
-					<!--archive>
-						<manifest>
-							<mainClass>org.alpa.wjamec.pairings.cli.CommandLine</mainClass>
-						</manifest>
-					</archive-->
 				</configuration>
 			</plugin>
 			<plugin>
