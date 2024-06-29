@@ -62,7 +62,7 @@ public class TransformCommand implements Runnable {
     /** determines whether or not the transformed pairings are abbreviated */
     @Option(name = { "-a", "--abbreviate" }, description = "Abbreviate the transformed pairings")
     @Once
-    private boolean abbreviate = false;
+    protected boolean abbreviate = false;
 
     /** specifies the parings file to be transformed */
     @Option(arity = 1, name = { "-i",
@@ -71,7 +71,7 @@ public class TransformCommand implements Runnable {
     @EndsWith(suffixes = { TextFilenameFilter.TEXT_FILENAME_EXT, XmlFilenameFilter.XML_FILENAME_EXT })
     @Once
     @NoOptionLikeValues
-    private String input;
+    protected String input;
 
     /** specifies the transformed pairings file */
     @Option(arity = 1, name = { "-o",
@@ -80,7 +80,7 @@ public class TransformCommand implements Runnable {
     @EndsWith(suffixes = XmlFilenameFilter.XML_FILENAME_EXT)
     @Once
     @NoOptionLikeValues
-    private String output;
+    protected String output;
 
     /**
      * Reads the input pairings file or stream of this transform command.
@@ -91,7 +91,7 @@ public class TransformCommand implements Runnable {
      * @throws JAXBException
      *                               if the input pairings stream could not be unmarshalled
      */
-    private Pairings readInputPairings() throws PairingsException, JAXBException {
+    protected Pairings readInputPairings() throws PairingsException, JAXBException {
         Pairings pairings = null;
 
         if (null != this.input) {
@@ -120,7 +120,7 @@ public class TransformCommand implements Runnable {
      * @throws JAXBException
      *                               if the pairings could not be marshaled
      */
-    private void writeOutputPairings(Pairings pairings) throws PairingsException, JAXBException {
+    protected void writeOutputPairings(Pairings pairings) throws PairingsException, JAXBException {
         if (null != pairings) {
             if (null != this.output) {
                 // write transformed pairings to output file
@@ -151,8 +151,7 @@ public class TransformCommand implements Runnable {
                 Pairings pairings = this.readInputPairings();
                 this.writeOutputPairings(pairings);
             } catch (PairingsException | JAXBException e) {
-                System.err.println(
-                        String.format("Error: Unable to transform pairings file %s (%s)", this.input, e.getMessage()));
+                System.err.println(String.format("Error: Unable to transform pairings (%s)", e.getMessage()));
                 System.exit(1);
             }
         }

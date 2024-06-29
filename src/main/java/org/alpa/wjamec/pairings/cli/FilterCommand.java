@@ -34,22 +34,14 @@ import java.util.function.Predicate;
 import org.alpa.wjamec.pairings.exceptions.PairingsException;
 import org.alpa.wjamec.pairings.jaxb.Base;
 import org.alpa.wjamec.pairings.jaxb.Pairings;
-import org.alpa.wjamec.pairings.jaxb.PairingsMarshaller;
-import org.alpa.wjamec.pairings.jaxb.PairingsTransformers;
-import org.alpa.wjamec.pairings.jaxb.PairingsUnmarshaller;
 import org.alpa.wjamec.pairings.jaxb.PreliminaryPairing;
-import org.alpa.wjamec.pairings.util.PairingsFiles;
 import org.alpa.wjamec.pairings.util.PairingsQueries;
-import org.alpa.wjamec.pairings.util.TextFilenameFilter;
-import org.alpa.wjamec.pairings.util.XmlFilenameFilter;
 
 import com.github.rvesse.airline.HelpOption;
 import com.github.rvesse.airline.annotations.AirlineModule;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.restrictions.AllowedEnumValues;
-import com.github.rvesse.airline.annotations.restrictions.EndsWith;
-import com.github.rvesse.airline.annotations.restrictions.File;
 import com.github.rvesse.airline.annotations.restrictions.MutuallyExclusiveWith;
 import com.github.rvesse.airline.annotations.restrictions.NoOptionLikeValues;
 import com.github.rvesse.airline.annotations.restrictions.Once;
@@ -65,34 +57,11 @@ import jakarta.xml.bind.JAXBException;
  * 
  */
 @Command(name = "filter", description = "Filter a pairings file and transform it into a corresponding XML representation")
-public class FilterCommand implements Runnable {
+public class FilterCommand extends TransformCommand implements Runnable {
 
     /** contains the help of this filter command */
     @AirlineModule
     private HelpOption<FilterCommand> help;
-
-    /** determines whether or not the filtered pairings are abbreviated */
-    @Option(name = { "-a", "--abbreviate" }, description = "Abbreviate the filtered pairings")
-    @Once
-    private boolean abbreviate = false;
-
-    /** specifies the parings file to be filtered */
-    @Option(arity = 1, name = { "-i",
-            "--input" }, title = "PairingsFile", description = "The name of the pairings file to be filtered")
-    @File(mustExist = true, readable = true, writable = false)
-    @EndsWith(suffixes = { TextFilenameFilter.TEXT_FILENAME_EXT, XmlFilenameFilter.XML_FILENAME_EXT })
-    @NoOptionLikeValues
-    @Once
-    private String input;
-
-    /** specifies the filtered pairings file */
-    @Option(arity = 1, name = { "-o",
-            "--output" }, title = "PairingsFile", description = "The name of the resulting filtered pairings file")
-    @File(mustExist = false, readable = false, writable = true)
-    @EndsWith(suffixes = XmlFilenameFilter.XML_FILENAME_EXT)
-    @NoOptionLikeValues
-    @Once
-    private String output;
 
     /** specifies the base filter */
     @Option(arity = 1, name = { "-b",
@@ -132,65 +101,6 @@ public class FilterCommand implements Runnable {
     @Option(name = { "-nr", "--noRedEye" }, description = "Filter all pairings having no red eye legs")
     @Once
     private boolean noRedEyes = false;
-
-    /**
-     * Reads the input pairings file or stream of this filter command.
-     * 
-     * @return the pairings of the input pairings file or stream
-     * @throws PairingsException
-     *                               if the input pairings file could not be read
-     * @throws JAXBException
-     *                               if the input pairings stream could not be unmarshalled
-     */
-    private Pairings readInputPairings() throws PairingsException, JAXBException {
-        Pairings pairings = null;
-
-        if (null != this.input) {
-            // read pairings from input file
-            if (this.input.endsWith(TextFilenameFilter.getExtension())) {
-                pairings = PairingsFiles.readTextPairings(this.input);
-            } else if (this.input.endsWith(XmlFilenameFilter.getExtension())) {
-                pairings = PairingsFiles.readXmlPairings(this.input);
-            }
-        } else {
-            // read XML pairings from standard in
-            PairingsUnmarshaller pairingsUnmarshaller = new PairingsUnmarshaller();
-            pairings = (Pairings) pairingsUnmarshaller.unmarshal(System.in);
-        }
-
-        return pairings;
-    }
-
-    /**
-     * Writes the output pairings file of this filter command.
-     * 
-     * @param pairings
-     *                     the pairings to be written to the output pairings file
-     * @throws PairingsException
-     *                               if the pairings file could not be written
-     * @throws JAXBException
-     *                               if the pairings could not be marshalled
-     */
-    private void writeOutputPairings(Pairings pairings) throws PairingsException, JAXBException {
-        if (null != pairings) {
-            if (null != this.output) {
-                // write transformed pairings to output file
-                if (this.abbreviate) {
-                    PairingsFiles.writeXmlPairings(this.output, PairingsTransformers.toAbbreviated(pairings));
-                } else {
-                    PairingsFiles.writeXmlPairings(this.output, pairings);
-                }
-            } else {
-                // write transformed pairings to standard out
-                PairingsMarshaller pairingsMarshaller = new PairingsMarshaller();
-                if (this.abbreviate) {
-                    pairingsMarshaller.marshal(PairingsTransformers.toAbbreviated(pairings), System.out);
-                } else {
-                    pairingsMarshaller.marshal(pairings, System.out);
-                }
-            }
-        }
-    }
 
     /**
      * Applies the filters of this filter command to pairings.
@@ -357,8 +267,7 @@ public class FilterCommand implements Runnable {
                 this.applyFilters(pairings);
                 this.writeOutputPairings(pairings);
             } catch (PairingsException | JAXBException e) {
-                System.err.println(
-                        String.format("Error: Unable to filter pairings file %s (%s)", this.input, e.getMessage()));
+                System.err.println(String.format("Error: Unable to filter pairings (%s)", e.getMessage()));
                 System.exit(1);
             }
         }
