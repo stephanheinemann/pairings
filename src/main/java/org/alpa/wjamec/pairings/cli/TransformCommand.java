@@ -30,6 +30,7 @@ import org.alpa.wjamec.pairings.exceptions.PairingsException;
 import org.alpa.wjamec.pairings.jaxb.Pairings;
 import org.alpa.wjamec.pairings.jaxb.PairingsMarshaller;
 import org.alpa.wjamec.pairings.jaxb.PairingsTransformers;
+import org.alpa.wjamec.pairings.jaxb.PairingsUnmarshaller;
 import org.alpa.wjamec.pairings.util.PairingsFiles;
 import org.alpa.wjamec.pairings.util.TextFilenameFilter;
 import org.alpa.wjamec.pairings.util.XmlFilenameFilter;
@@ -42,7 +43,6 @@ import com.github.rvesse.airline.annotations.restrictions.EndsWith;
 import com.github.rvesse.airline.annotations.restrictions.File;
 import com.github.rvesse.airline.annotations.restrictions.NoOptionLikeValues;
 import com.github.rvesse.airline.annotations.restrictions.Once;
-import com.github.rvesse.airline.annotations.restrictions.Required;
 
 import jakarta.xml.bind.JAXBException;
 
@@ -61,24 +61,85 @@ public class TransformCommand implements Runnable {
 
     /** determines whether or not the transformed pairings are abbreviated */
     @Option(name = { "-a", "--abbreviate" }, description = "Abbreviate the transformed pairings")
+    @Once
     private boolean abbreviate = false;
 
     /** specifies the parings file to be transformed */
-    @Option(arity = 1, description = "The name of the pairings file to be transformed", name = { "-i", "--input" })
+    @Option(arity = 1, name = { "-i",
+            "--input" }, title = "PairingsFile", description = "The name of the pairings file to be transformed")
     @File(mustExist = true, readable = true, writable = false)
     @EndsWith(suffixes = { TextFilenameFilter.TEXT_FILENAME_EXT, XmlFilenameFilter.XML_FILENAME_EXT })
     @Once
-    @Required
     @NoOptionLikeValues
     private String input;
 
     /** specifies the transformed pairings file */
-    @Option(arity = 1, description = "The name of the resulting transformed pairings file", name = { "-o", "--output" })
+    @Option(arity = 1, name = { "-o",
+            "--output" }, title = "PairingsFile", description = "The name of the resulting transformed pairings file")
     @File(mustExist = false, readable = false, writable = true)
     @EndsWith(suffixes = XmlFilenameFilter.XML_FILENAME_EXT)
     @Once
     @NoOptionLikeValues
     private String output;
+
+    /**
+     * Reads the input pairings file or stream of this transform command.
+     * 
+     * @return the pairings of the input pairings file or stream
+     * @throws PairingsException
+     *                               if the input pairings file could not be read
+     * @throws JAXBException
+     *                               if the input pairings stream could not be unmarshalled
+     */
+    private Pairings readInputPairings() throws PairingsException, JAXBException {
+        Pairings pairings = null;
+
+        if (null != this.input) {
+            // read pairings from input file
+            if (this.input.endsWith(TextFilenameFilter.getExtension())) {
+                pairings = PairingsFiles.readTextPairings(this.input);
+            } else if (this.input.endsWith(XmlFilenameFilter.getExtension())) {
+                pairings = PairingsFiles.readXmlPairings(this.input);
+            }
+        } else {
+            // read XML pairings from standard in
+            PairingsUnmarshaller pairingsUnmarshaller = new PairingsUnmarshaller();
+            pairings = (Pairings) pairingsUnmarshaller.unmarshal(System.in);
+        }
+
+        return pairings;
+    }
+
+    /**
+     * Writes the output pairings file of this transform command.
+     * 
+     * @param pairings
+     *                     the pairings to be written to the output pairings file
+     * @throws PairingsException
+     *                               if the pairings file could not be written
+     * @throws JAXBException
+     *                               if the pairings could not be marshaled
+     */
+    private void writeOutputPairings(Pairings pairings) throws PairingsException, JAXBException {
+        if (null != pairings) {
+            if (null != this.output) {
+                // write transformed pairings to output file
+                if (this.abbreviate) {
+                    PairingsFiles.writeXmlPairings(this.output, PairingsTransformers.toAbbreviated(pairings));
+                } else {
+                    PairingsFiles.writeXmlPairings(this.output, pairings);
+                }
+            } else {
+                // write transformed pairings to standard out
+                PairingsMarshaller pairingsMarshaller = new PairingsMarshaller();
+                if (this.abbreviate) {
+                    pairingsMarshaller.marshal(PairingsTransformers.toAbbreviated(pairings), System.out);
+                } else {
+                    pairingsMarshaller.marshal(pairings, System.out);
+                }
+            }
+        }
+    }
 
     /**
      * Runs this transform command.
@@ -87,34 +148,11 @@ public class TransformCommand implements Runnable {
     public void run() {
         if (!this.help.showHelpIfRequested()) {
             try {
-                Pairings pairings = null;
-
-                if (this.input.endsWith(TextFilenameFilter.getExtension())) {
-                    pairings = PairingsFiles.readTextPairings(this.input);
-                } else if (this.input.endsWith(XmlFilenameFilter.getExtension())) {
-                    pairings = PairingsFiles.readXmlPairings(this.input);
-                }
-
-                if (null != pairings) {
-                    if (null != this.output) {
-                        // write transformed pairings to output file
-                        if (this.abbreviate) {
-                            PairingsFiles.writeXmlPairings(this.output, PairingsTransformers.toAbbreviated(pairings));
-                        } else {
-                            PairingsFiles.writeXmlPairings(this.output, pairings);
-                        }
-                    } else {
-                        // write transformed pairings to standard out
-                        PairingsMarshaller pairingsMarshaller = new PairingsMarshaller();
-                        if (this.abbreviate) {
-                            pairingsMarshaller.marshal(PairingsTransformers.toAbbreviated(pairings), System.out);
-                        } else {
-                            pairingsMarshaller.marshal(pairings, System.out);
-                        }
-                    }
-                }
+                Pairings pairings = this.readInputPairings();
+                this.writeOutputPairings(pairings);
             } catch (PairingsException | JAXBException e) {
-                System.err.println(String.format("Error: Unable to transform pairings file %s", this.input));
+                System.err.println(
+                        String.format("Error: Unable to transform pairings file %s (%s)", this.input, e.getMessage()));
                 System.exit(1);
             }
         }

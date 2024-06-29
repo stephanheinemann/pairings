@@ -67,13 +67,26 @@ public class PairingsQueries {
     }
 
     /**
-     * Collects the airports of pairings, that is, the network covered by pairings.
+     * Gets the local date for a day of the month within a pairings' validity period.
+     * 
+     * @param pairings
+     *                       the pairings covering a validity period
+     * @param dayOfMonth
+     *                       the day of the month within the pairings' validity period
+     * @return the local date for the day of the month within the pairings' validity period
+     */
+    public static LocalDate getLocalDate(Pairings pairings, short dayOfMonth) {
+        return LocalDate.of(pairings.getValidFrom().getYear(), pairings.getValidFrom().getMonth(), dayOfMonth);
+    }
+
+    /**
+     * Gets the airports of pairings, that is, the network covered by pairings.
      * 
      * @param pairings
      *                     the pairings containing the origin and destination airports
      * @return the airports of the pairings
      */
-    public static SortedSet<String> collectAirports(Pairings pairings) {
+    public static SortedSet<String> getAirports(Pairings pairings) {
         SortedSet<String> airports = new TreeSet<>();
 
         for (PreliminaryPairing preliminary : pairings.getPairing()) {
