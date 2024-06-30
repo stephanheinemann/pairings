@@ -122,10 +122,8 @@ public class FilterCommand extends TransformCommand implements Runnable {
 
             if (!pairings.getPreliminaryPairing().isEmpty()) {
                 pairings.getPreliminaryPairing().removeIf(filter.negate());
-                // pairings.getPreliminaryPairing().retainAll(pairings.getPreliminaryPairing().stream().filter(filter).toList());
             } else if (!pairings.getPairing().isEmpty()) {
                 pairings.getPairing().removeIf(filter.negate());
-                // pairings.getPairing().retainAll(pairings.getPairing().stream().filter(filter).toList());
             } else {
                 throw new PairingsException("unsupported pairings format for filtering");
             }
@@ -164,8 +162,7 @@ public class FilterCommand extends TransformCommand implements Runnable {
                 LocalDate start = PairingsQueries.getLocalDate(pairings, this.within.get(0));
                 LocalDate end = PairingsQueries.getLocalDate(pairings, this.within.get(1));
                 if (!start.isAfter(end)) {
-                    System.out.println(String.format("start: %s, end: %s", start.toString(), end.toString()));
-                    withinFilter.and(PairingsQueries.isWithinDates(start, end));
+                    withinFilter = PairingsQueries.isWithinDates(start, end);
                 } else {
                     throw new PairingsException("start is after end");
                 }
@@ -194,8 +191,7 @@ public class FilterCommand extends TransformCommand implements Runnable {
                 LocalDate start = PairingsQueries.getLocalDate(pairings, this.outside.get(0));
                 LocalDate end = PairingsQueries.getLocalDate(pairings, this.outside.get(1));
                 if (!start.isAfter(end)) {
-                    System.out.println(String.format("start: %s, end: %s", start.toString(), end.toString()));
-                    outsideFilter.and(PairingsQueries.isOutsideDates(start, end));
+                    outsideFilter = PairingsQueries.isOutsideDates(start, end);
                 } else {
                     throw new PairingsException("start is after end");
                 }
