@@ -50,7 +50,7 @@ import jakarta.xml.bind.JAXBException;
  * @author Stephan Heinemann
  * 
  */
-@Command(name = "sort", description = "Sort a pairings file and transform it into a corresponding XML representation")
+@Command(name = "sort", description = "Sort a pairings file and transform it into a sorted XML representation")
 public class SortCommand extends TransformCommand implements Runnable {
 
     /** contains the help of this sort command */
@@ -59,28 +59,28 @@ public class SortCommand extends TransformCommand implements Runnable {
 
     /** specifies the credit comparing sort order */
     @Option(arity = 1, name = { "-c",
-            "--credit" }, title = "SortOrder", description = "Sort by comparing pairing credit with the specified sort order")
+            "--credit" }, title = "SortOrder", description = "Sort by comparing pairing credit applying the specified sort order")
     @Once
     @ShortRange(min = 1, max = 10)
     private Short creditComparing;
 
     /** specifies the credit ratio comparing sort order */
     @Option(arity = 1, name = { "-cr",
-            "--creditRatio" }, title = "SortOrder", description = "Sort by comparing pairing credit ratio with the specified sort order")
+            "--creditRatio" }, title = "SortOrder", description = "Sort by comparing pairing credit ratio applying the specified sort order")
     @Once
     @ShortRange(min = 1, max = 10)
     private Short creditRatioCopmaring;
 
     /** specifies the duty days comparing sort order */
     @Option(arity = 1, name = { "-dd",
-            "--dutyDays" }, title = "SortOrder", description = "Sort by comparing pairing duty days with the specified sort order")
+            "--dutyDays" }, title = "SortOrder", description = "Sort by comparing pairing duty days applying the specified sort order")
     @Once
     @ShortRange(min = 1, max = 10)
     private Short dutyDaysComparing;
 
     /** specifies the per diem comparing sort order */
     @Option(arity = 1, name = { "-pd",
-            "--perDiem" }, title = "SortOrder", description = "Sort by comparing pairing per diem with the specified sort order")
+            "--perDiem" }, title = "SortOrder", description = "Sort by comparing pairing per diem applying the specified sort order")
     @Once
     @ShortRange(min = 1, max = 10)
     private Short perDiemComparing;

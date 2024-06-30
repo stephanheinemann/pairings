@@ -56,7 +56,7 @@ import jakarta.xml.bind.JAXBException;
  * @author Stephan Heinemann
  * 
  */
-@Command(name = "filter", description = "Filter a pairings file and transform it into a corresponding XML representation")
+@Command(name = "filter", description = "Filter a pairings file and transform it into a filtered XML representation")
 public class FilterCommand extends TransformCommand implements Runnable {
 
     /** contains the help of this filter command */
